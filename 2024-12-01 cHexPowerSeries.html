@@ -1,0 +1,250 @@
+<script>
+
+
+function consolidate(a,b,c,d,e,f,g,h){
+//a,c,e,g must be 0 if mod2, i.e. even or 0
+	const consolidArray=[];
+	let realSign=0;
+	let imSign=0;
+	let realMag=0;
+	let imMag=0;
+
+	if (a==e){
+		realMag=b+f;
+	} else {
+		realMag=Math.abs(b-f);
+}
+
+	if (c==g){
+		imMag=d+h;
+	} else {
+		imMag=Math.abs(d-h);
+}
+
+	if (a==e && (b+f) != 0){
+	realSign=a;	
+	}
+	
+	if(b>f){
+	realSign=a;
+} 	
+
+	if (f>b){
+	realSign=e;
+} 	
+
+	if (b+f==0){
+	realSign=0;	
+}
+
+	if (c==g && (d+h) != 0){
+	imSign=c;	
+	}
+	
+	if(d>h){
+	imSign=c;
+} 	
+
+	if (h>d){
+	imSign=g;
+} 	
+
+	if (d+h==0){
+	imSign=0;	
+}
+
+	consolidArray.push(realSign,realMag,imSign,imMag);
+
+consolid=consolidArray;
+
+return consolid;
+}	
+
+
+
+function hexMultiply(a,b,c,d){
+//a,c must be even or 0
+	const productArray=[];
+	let realSign1=0;
+	let realSign2=0;
+	let realMag1=0;
+	let realMag2=0;
+	let productMag=0;
+	let productSign=0;
+
+	if (b == 0 || d==0){
+	productSign=0;
+	} else {
+	productSign=(a+c)%12;
+	}
+
+	productMag=b*d;
+
+	productArray.push(productSign,productMag);
+
+hexProduct = productArray;
+
+return hexProduct;
+}	
+
+
+function cHexConjugate(a,b,c,d){
+//a,c must be even or 0
+	let newImSign=(c+6)%12;
+	const outputArray=[a,b,newImSign,d];
+	
+return outputArray;
+}
+
+
+
+function cHexMultiply(a,b,c,d,e,f,g,h){
+//a,c,e,g must be 0 if mod2, i.e. even or 0
+	const productArray=[];
+	const productArray1=[];
+	const productArray2=[];
+	const consolidArray2=[];
+	const productArray3=[];
+	let productRealSign=0;
+	let productImSign=0;
+	let productRealMag=0;
+	let productImMag=0;
+	
+//First, Last...
+	productArray1.push(...hexMultiply(a,b,e,f));
+	productArray1.push(...hexMultiply(c,d,e,f));
+	productArray2.push(...hexMultiply(c,d,g+2,h));
+	productArray2.push(...hexMultiply(a,b,g,h));
+	const consolidArray1=productArray1.concat(...productArray2);
+	consolidArray2.push(...consolidate(...consolidArray1));
+
+cHexProduct = consolidArray2;
+
+return cHexProduct;
+}	
+
+
+
+
+
+
+function exponentiateMe(a,b,c,d,e){
+////e is exponent, must be positive integer greater than two (for now). a,c are signs expressed as even exponents modulo 12. b, d are magnitudes.
+
+	const realSign=[a];
+	const realMag=[b];
+	const imSign=[c];
+	const imMag=[d];
+	const productArray=[];
+	const factorArray=[];
+	const hexProduct=[];
+
+for  (let i = 0; i < e-1; i++){
+	
+	let realSign01=realSign[i];
+	let realMag01=realMag[i];
+	let imSign01=imSign[i];
+	let imMag01=imMag[i];
+	
+	productArray.push(...cHexMultiply(a,b,c,d,realSign01,realMag01,imSign01,imMag01));
+	
+	realSign.push(productArray[(i*4)]);
+	realMag.push(productArray[(i*4)+1]);
+	imSign.push(productArray[(i*4)+2]);
+	imMag.push(productArray[(i*4)+3]);
+
+}
+
+	arrayLength=productArray.length;
+	
+	
+	let outputSign=productArray[arrayLength-4];
+	let outputMag=productArray[arrayLength-3];
+	let outputSign2=productArray[arrayLength-2];
+	let outputMag2=productArray[arrayLength-1];
+hexProduct.push(outputSign,outputMag,outputSign2,outputMag2);
+
+return hexProduct;
+}	
+
+/*
+function divideMe(a,b,c,d,e,f,g,h){
+//divide one real-like or imaginary-like  hexapolar number (sign a, magnitude b) by another (sign e,magnitude f)--undefined for f=0.
+
+	divisorRealSign=e;
+	divisorRealMag=f;
+	divisorImSign=g;
+	divisorImMag=h;
+	dividendRealSign=a;
+	dividendRealMag=b;
+	dividendImSign=c;
+	dividendImMag=d;
+	
+	if (f!=0){quotientRealMag=b/f;} else {quotientRealMag=0;}
+	quotientRealMag=b/f;
+	quotientRealSign=(((a-e)%12)+12)%12;
+	
+	if (h!=0){quotientImMag=d/h;} else {quotientImMag=0;}
+	
+	
+	quotientImSign=(((c-g)%12)+12)%12;
+	
+	const quotientArray=[quotientRealSign,quotientRealMag,quotientImSign,quotientImMag];
+return quotientArray;
+}
+*/
+
+
+
+function cHexExpPowerSeries(a,b,c,d,n){
+//recommend n<200
+//(0,1,9) yields a good approximation of e; (6,1,9) yields a good approximation of its multiplicative inverse.
+//hexapolar units not in the complex plane converge to values other than e^-1 depending on whether their roots are real-like or imaginary-like.
+//exp(s1.57)-> rootless orthant.  
+
+	d=d%(Math.PI*6);
+
+function factorial(n){
+    if (n == 0)
+        return 1;
+    return n * factorial(n - 1);
+
+
+}
+
+	let consolid=consolidate(0,1,0,0,a,b,c,d);
+
+	for (let i=0; i<n-1;i++){
+	
+
+	let quotient=(cHexMultiply(...exponentiateMe(a,b,c,d,(i+2)),0,(1/(factorial(i+2))),0,0));
+	
+
+	
+	consolid=consolidate(...consolid,...quotient);
+	
+	let newSum=consolid;
+
+	}
+
+	let output=consolid;
+return output;	
+
+}
+
+
+	for (let i=0; i<1440; i++){
+
+//beware floating-point decimals! computations with Math.PI evidence errors
+//there are irregularities with s^1 unlike the expected values of s^3.
+//is it "information"?
+//console.log(" " +  " " + i, cHexExpPowerSeries(0,0,4,1*((6*Math.PI/1440)*i),200));
+console.log(" " +  " " + i, cHexExpPowerSeries(6,1,0,0,200));
+}
+</script>
+//what is the difference between multiplicative inverses of cHexExpPowerSeries(10,1,0,0,200)) and cHexExpPowerSeries(8,1,0,0,200))?
+0.28176777473849945 -> 3.54902188843
+0.2984344915093886 -> 3.35081911927
+...0.19820276916
+
+e^-1 0.367879441171 -> 2.71828182846
