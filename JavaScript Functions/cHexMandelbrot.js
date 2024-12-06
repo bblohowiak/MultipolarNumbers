@@ -52,7 +52,7 @@ conjProductArray.push(...cHexMultiply(zRealSign,zRealMag,zImSign,zImMag,zRealSig
 	tooBig=(zRealMag**2)+(zImMag**2);
 }
 
-newZArray.push(...consolidate(...exponentiateMe(zRealSign,zRealMag,zImSign,zImMag,e),a,b,c,d));
+newZArray.push(...consolidate(...cHexNaturalExponent(zRealSign,zRealMag,zImSign,zImMag,e),a,b,c,d));
 
 //these newZ array values might come in handy for a Buddhabrot variation...
 
