@@ -32,7 +32,7 @@ function factorial(n){
 	for (let i=0; i<n-1;i++){
 	
 
-	let quotient=(cHexMultiply(...exponentiateMe(a,b,c,d,(i+2)),0,(1/(factorial(i+2))),0,0));
+	let quotient=(cHexMultiply(...cHexNaturalExponent(a,b,c,d,(i+2)),0,(1/(factorial(i+2))),0,0));
 	
 
 	
