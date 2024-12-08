@@ -1,6 +1,6 @@
 function cHexArgument(a,b,c,d) {
 //combination of a&c indicates which cycle of exponentiation, cycleID=1->s^theta, cycleID=2 s5^theta, cycleID=0->s3^theta
-//not for use with rootless orthants
+//not for use with orthants that a signed s under repeat self-multiplication bypasses
 //let's compute cycleID
 
 	if ((a==0 && c==2)){var cycleID=0;}
