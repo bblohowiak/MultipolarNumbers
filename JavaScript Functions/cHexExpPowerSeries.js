@@ -2,7 +2,7 @@ function cHexExpPowerSeries(a,b,c,d,n){
 //recommend n<200
 //(0,1,9) yields a good approximation of e; (6,1,9) yields a good approximation of its multiplicative inverse.
 //hexapolar units not in the complex plane converge to values other than e^-1 depending on whether their roots are real-like or imaginary-like.
-//exp(s1.57)-> rootless orthant.  
+//exp(s1.57)-> orthant that a signed s under repeat self-multiplication bypasses
 
 /*if you don't include the //	d=d%(Math.PI*6);, even cHexExpPowerSeries(0,0,2,1*((6*Math.PI/200)*i),200)) produces after 200 iterations
 0 0
