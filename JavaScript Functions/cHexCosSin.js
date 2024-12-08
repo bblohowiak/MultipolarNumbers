@@ -1,7 +1,7 @@
 function cHexCosSin(a,b) {
 //a indicates which cycle of exponentiation, csCycleID=1->s^theta, csCycleID=2 s5^theta, csCycleID=0->s3^theta
 //b indicates a distance in radians
-//not for use with rootless orthants
+//not for use with orthants that a signed s under repeat self-multiplication bypasses
 
 	let argumentNose=b%Math.PI;
 	let csrealMag=Math.abs(Math.cos(argumentNose));
