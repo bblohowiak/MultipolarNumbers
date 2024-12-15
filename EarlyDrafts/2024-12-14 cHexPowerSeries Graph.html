@@ -1,0 +1,739 @@
+<script>
+//Check the JavaScript console log to get the data!
+
+function consolidate(a,b,c,d,e,f,g,h){
+//a,c,e,g must be 0 if mod2, i.e. even or 0
+	const consolidArray=[];
+	let realSign=0;
+	let imSign=0;
+	let realMag=0;
+	let imMag=0;
+
+	if (a==e){
+		realMag=b+f;
+	} else {
+		realMag=Math.abs(b-f);
+}
+
+	if (c==g){
+		imMag=d+h;
+	} else {
+		imMag=Math.abs(d-h);
+}
+
+	if (a==e && (b+f) != 0){
+	realSign=a;	
+	}
+	
+	if(b>f){
+	realSign=a;
+} 	
+
+	if (f>b){
+	realSign=e;
+} 	
+
+	if (b+f==0){
+	realSign=0;	
+}
+
+	if (c==g && (d+h) != 0){
+	imSign=c;	
+	}
+	
+	if(d>h){
+	imSign=c;
+} 	
+
+	if (h>d){
+	imSign=g;
+} 	
+
+	if (d+h==0){
+	imSign=0;	
+}
+
+	consolidArray.push(realSign,realMag,imSign,imMag);
+
+consolid=consolidArray;
+
+return consolid;
+}	
+
+
+
+function hexMultiply(a,b,c,d){
+//a,c must be even or 0
+	const productArray=[];
+	let realSign1=0;
+	let realSign2=0;
+	let realMag1=0;
+	let realMag2=0;
+	let productMag=0;
+	let productSign=0;
+
+	if (b == 0 || d==0){
+	productSign=0;
+	} else {
+	productSign=(a+c)%12;
+	}
+
+	productMag=b*d;
+
+	productArray.push(productSign,productMag);
+
+hexProduct = productArray;
+
+return hexProduct;
+}	
+
+
+function cHexConjugate(a,b,c,d){
+//a,c must be even or 0
+	let newImSign=(c+6)%12;
+	const outputArray=[a,b,newImSign,d];
+	
+return outputArray;
+}
+
+
+
+function cHexMultiply(a,b,c,d,e,f,g,h){
+//a,c,e,g must be 0 if mod2, i.e. even or 0
+	const productArray=[];
+	const productArray1=[];
+	const productArray2=[];
+	const consolidArray2=[];
+	const productArray3=[];
+	let productRealSign=0;
+	let productImSign=0;
+	let productRealMag=0;
+	let productImMag=0;
+	
+//First, Last...
+	productArray1.push(...hexMultiply(a,b,e,f));
+	productArray1.push(...hexMultiply(c,d,e,f));
+	productArray2.push(...hexMultiply(c,d,g+2,h));
+	productArray2.push(...hexMultiply(a,b,g,h));
+	const consolidArray1=productArray1.concat(...productArray2);
+	consolidArray2.push(...consolidate(...consolidArray1));
+
+cHexProduct = consolidArray2;
+
+return cHexProduct;
+}	
+
+
+
+
+
+
+function cHexNaturalExponent(a,b,c,d,e){
+////e is exponent, must be positive integer greater than two (for now). a,c are signs expressed as even exponents modulo 12. b, d are magnitudes.
+
+	const realSign=[a];
+	const realMag=[b];
+	const imSign=[c];
+	const imMag=[d];
+	const productArray=[];
+	const factorArray=[];
+	const hexProduct=[];
+
+for  (let i = 0; i < e-1; i++){
+	
+	let realSign01=realSign[i];
+	let realMag01=realMag[i];
+	let imSign01=imSign[i];
+	let imMag01=imMag[i];
+	
+	productArray.push(...cHexMultiply(a,b,c,d,realSign01,realMag01,imSign01,imMag01));
+	
+	realSign.push(productArray[(i*4)]);
+	realMag.push(productArray[(i*4)+1]);
+	imSign.push(productArray[(i*4)+2]);
+	imMag.push(productArray[(i*4)+3]);
+
+}
+
+	arrayLength=productArray.length;
+	
+	
+	let outputSign=productArray[arrayLength-4];
+	let outputMag=productArray[arrayLength-3];
+	let outputSign2=productArray[arrayLength-2];
+	let outputMag2=productArray[arrayLength-1];
+hexProduct.push(outputSign,outputMag,outputSign2,outputMag2);
+
+return hexProduct;
+}	
+
+
+function cHexSqrt(a,b,c,d){
+
+
+
+
+}
+
+function cHexArgument(a,b,c,d) {
+//combination of a&c indicates which cycle of exponentiation, cycleID=1->s^theta, cycleID=2 s5^theta, cycleID=0->s3^theta
+//not for use with orthants that a signed s under repeat self-multiplication bypasses
+//let's compute cycleID
+
+	if ((a==0 && c==2)){var cycleID=0;}
+	if ((a==6 && c==2)) {var cycleID=0;}
+	if ((a==6 && c==8)) {var cycleID=0;}
+	if ((a==0 && c==8)){var cycleID=0;}
+
+
+	if ((a==0 && c==0)){var cycleID=1;}
+	if ((a==2 && c==0)) {var cycleID=1;}
+	if ((a==2 && c==2)){var cycleID=1;}
+	if ((a==4 && c==2 )){var cycleID=1;}
+	if ((a==4 && c==4 )){var cycleID=1;}
+	if ((a==6 && c==4)){var cycleID=1;}
+	if ((a==6 && c==6 )) {var cycleID=1;}
+	if ((a==8 && c==6)) {var cycleID=1;}
+	if ((a==8 && c==8 )){var cycleID=1;}
+	if ((a==10 && c==8 )){var cycleID=1;}
+	if ((a==10 && c==10 )){var cycleID=1;}
+	if ((a==0 && c==10)) {var cycleID=1;}
+	
+	if ((a==0 && c==4)){var cycleID=2;}
+	if ((a==10 && c==4)) {var cycleID=2;}
+	if ((a==10 && c==2)) {var cycleID=2;}
+	if ((a==8 && c==2)){var cycleID=2;}
+	if ((a==8 && c==0)){var cycleID=2;}
+	if ((a==6 && c==0)){var cycleID=2;}
+	if ((a==6 && c==10)) {var cycleID=2;}
+	if ((a==4 && c==10)) {var cycleID=2;}
+	if ((a==4 && c==8)){var cycleID=2;}
+	if ((a==2 && c==8)){var cycleID=2;}
+	if ((a==2 && c==6)){var cycleID=2;}
+	if ((a==0 && c==6)) {var cycleID=2;}
+
+//how far in radians are we from 1?
+
+//if a=0 and c=0 then between 0-pi/2 radians
+//if a=2 and c=0 then between pi/2-pi radians
+//if a=2 and c=0 then between pi-3pi/2 radians
+//if a=4 and c=0 then between 3pi/2-2 radians
+//if a=4 and c=0 then between 2 0-pi/2 radians--increment factor every four
+
+//how do you know exactly how much between? Each orthant is at most pi/2 radians, so how many radians from axis of orthant entry (aoeRads) to add to the cumulative number of radians at point of orthant entry, which assumes an orientation provided by the path of the imaginary-like unit; for a given orthant, what is its point of entry?
+
+//if a=0 and c=0 then real axis point of entry
+//if a=2 and c=0 then imaginary axis point of entry
+//if a=2 and c=2 then real
+//if a=4 and c=2 then imaginary...
+//AKA if a=c, real axis point of entry ELSE imaginary axis point of entry
+//if in an imaginary-axis point of entry orthant, use cos(-1*b)-(Math.PI/2) ELSE cos(b)
+
+//Math.atan2() returns  distance in radians between the ositive xaxis and (x, y), for some reason in reverse sequence Math.atan2(y, x).
+
+
+
+	if (((a==0 && c==0)||a==0 && c==2)||(a==0 && c==4)){ var orthantIndex=0;}
+	if (((a==2 && c==0)||a==6 && c==2)||(a==10 && c==4)) {var orthantIndex=1;}
+	if (((a==2 && c==2)||a==6 && c==8)||(a==10 && c==2)) {var orthantIndex=2;}
+	if (((a==4 && c==2 )||a==0 && c==8)||(a==8 && c==2)){var orthantIndex=3;}
+	if ((a==4 && c==4 )||(a==8 && c==0)){var orthantIndex=4; }
+	if ((a==6 && c==4) ||(a==6 && c==0)){var  orthantIndex=5;}
+	if ((a==6 && c==6 )||(a==6 && c==10)) {var orthantIndex=6;}
+	if ((a==8 && c==6)||(a==4 && c==10)) {var orthantIndex=7;}
+	if ((a==8 && c==8 )||(a==4 && c==8)){var orthantIndex=8;}
+	if ((a==10 && c==8 )||(a==2 && c==8)){var orthantIndex=9;}
+	if ((a==10 && c==10 )||(a==2 && c==6)){var orthantIndex=10;}
+	if ((a==0 && c==10)||(a==0 && c==6)) {var orthantIndex=11;}
+
+	let orthantEntryDistance=((Math.PI)/2)*orthantIndex;
+
+if (b*d!=0){
+	if ((a==c || ((a-c)%4)==0)||(c-a==2)){
+		var betweenMeasure=Math.atan2(d, b);
+} else {
+		var betweenMeasure=Math.atan2(d, -b)-(Math.PI/2);
+}
+
+	var outputTheta=orthantEntryDistance+betweenMeasure;
+} else {
+//if pure imaginary, s^x cycle
+	if (b==0 && cycleID==1){
+		var outputTheta=(Math.PI/2)*(c+1);
+//if pure real, s^x cycle
+	} else if (d==0 && cycleID==1){
+		var outputTheta=(Math.PI/2)*(c);
+	}
+
+
+//if pure imaginary, s5^x cycle
+	if (b==0 && cycleID==2){
+		if (c==4){var outputTheta=(Math.PI/2)*(1);}
+		if (c==2){var outputTheta=(Math.PI/2)*(3);}
+		if (c==0){var outputTheta=(Math.PI/2)*(5);}
+		if (c==10){var outputTheta=(Math.PI/2)*(7);}
+		if (c==8){var outputTheta=(Math.PI/2)*(9);}
+		if (c==6){var outputTheta=(Math.PI/2)*(11);}
+//if pure real, s5^x cycle
+	} else if (d==0 && cycleID==2){
+		if (a==0){var outputTheta=(Math.PI/2)*(0);}
+		if (a==2){var outputTheta=(Math.PI/2)*(2);}
+		if (a==4){var outputTheta=(Math.PI/2)*(4);}
+		if (a==6){var outputTheta=(Math.PI/2)*(6);}
+		if (a==8){var outputTheta=(Math.PI/2)*(8);}
+		if (a==10){var outputTheta=(Math.PI/2)*(10);}
+	}
+
+
+//if pure imaginary, s3^x cycle
+	if (b==0 && cycleID==0){
+		if (c==2){var outputTheta=(Math.PI/2)*(1);}
+		if (c==8){var outputTheta=(Math.PI/2)*(3);}
+//if pure real, s3^x cycle
+	} else if (d==0 && cycleID==0){
+		if (a==0){var outputTheta=(Math.PI/2)*(0);}
+		if (a==6){var outputTheta=(Math.PI/2)*(2);}	}
+
+
+
+}
+
+	const outputArray=[cycleID, outputTheta];
+
+
+return outputArray;
+}
+
+function cHexCosSin(a,b) {
+//a indicates which cycle of exponentiation, csCycleID=1->s^theta, csCycleID=2 s5^theta, csCycleID=0->s3^theta
+//b indicates a distance in radians
+//not for use with orthants that a signed s under repeat self-multiplication bypasses
+
+	let argumentNose=b%Math.PI;
+	let csrealMag=Math.abs(Math.cos(argumentNose));
+	let csimMag=Math.sin(argumentNose);
+	let orthantCount=(Math.floor(b/(Math.PI/2)))%12;
+	
+	if (a==0 && orthantCount%4==0){
+	var csrealSign=0;
+	var csimSign=2;}
+	if (a==0 && orthantCount%4==1){
+	var csrealSign=6;
+	var csimSign=2;}
+	if (a==0 && orthantCount%4==2){
+	var csrealSign=6;
+	var csimSign=8;}
+	if (a==0 && orthantCount%4==3){
+	var csrealSign=0;
+	var csimSign=8;}
+
+	if (a==1 && (orthantCount==0||orthantCount==12)){
+	var csrealSign=0;
+	var csimSign=0;}
+	if (a==1 && orthantCount==1){
+	var csrealSign=2;
+	var csimSign=0;}
+	if (a==1 && orthantCount==2){
+	var csrealSign=2;
+	var csimSign=2;}
+	if (a==1 && orthantCount==3){
+	var csrealSign=4;
+	var csimSign=2;}
+	if (a==1 && orthantCount==4){
+	var csrealSign=4;
+	var csimSign=4;}
+	if (a==1 && orthantCount==5){
+	var csrealSign=6;
+	var csimSign=4;}
+	if (a==1 && orthantCount==6){
+	var csrealSign=6;
+	var csimSign=6;}
+	if (a==1 && orthantCount==7){
+	var csrealSign=8;
+	var csimSign=6;}
+	if (a==1 && orthantCount==8){
+	var csrealSign=8;
+	var csimSign=8;}
+	if (a==1 && orthantCount==9){
+	var csrealSign=10;
+	var csimSign=8;}
+	if (a==1 && orthantCount==10){
+	var csrealSign=10;
+	var csimSign=10;}
+	if (a==1 && orthantCount==11){
+	var csrealSign=0;
+	var csimSign=10;}
+
+	if (a==2 && (orthantCount==0||orthantCount==12)){
+	var csrealSign=0;
+	var csimSign=4;}
+	if (a==2 && orthantCount==1){
+	var csrealSign=10;
+	var csimSign=4;}
+	if (a==2 && orthantCount==2){
+	var csrealSign=10;
+	var csimSign=2;}
+	if (a==2 && orthantCount==3){
+	var csrealSign=8;
+	var csimSign=2;}
+	if (a==2 && orthantCount==4){
+	var csrealSign=8;
+	var csimSign=0;}
+	if (a==2 && orthantCount==5){
+	var csrealSign=6;
+	var csimSign=0;}
+	if (a==2 && orthantCount==6){
+	var csrealSign=6;
+	var csimSign=10;}
+	if (a==2 && orthantCount==7){
+	var csrealSign=4;
+	var csimSign=10;}
+	if (a==2 && orthantCount==8){
+	var csrealSign=4;
+	var csimSign=8;}
+	if (a==2 && orthantCount==9){
+	var csrealSign=2;
+	var csimSign=8;}
+	if (a==2 && orthantCount==10){
+	var csrealSign=2;
+	var csimSign=6;}
+	if (a==2 && orthantCount==11){
+	var csrealSign=0;
+	var csimSign=6;}
+
+
+
+	if (csrealMag==0){
+	var csrealSign=0;
+	}
+	
+	if (csimMag==0){
+	var csimSign=0;
+	}
+	
+	
+	outputArray=[csrealSign,csrealMag,csimSign,csimMag];
+
+
+
+return outputArray;
+}
+
+
+
+
+
+////////HERE ARE A BUNCH OF FUNCTIONS
+
+
+function cHexSqrt(a,b,c,d){
+//some numbers have more than one square root. this function returns only one root per input. a future version might incorporate more rationale for why it returns one root instead of another.
+
+let euclideanModulus=cHexModulusEuclidean(a,b,c,d);
+var realLikeMag01=0;
+var imLikeMag01=0;
+var realLikeSign01=0;
+var imLikeSign01=0;
+
+
+
+	if (a%4 == 0){
+	realLikeMag01=Math.sqrt((euclideanModulus+b)/2);	
+	imLikeMag01=Math.sqrt((euclideanModulus-b)/2);	
+	} else {
+	realLikeMag01=Math.sqrt((euclideanModulus-b)/2);	
+	imLikeMag01=Math.sqrt((euclideanModulus+b)/2);	
+	}
+
+
+
+let argumentArray=cHexArgument(a,b,c,d);
+    argumentArray[1]=argumentArray[1]/2;
+
+//console.log(argumentArray);
+
+const cosSinArray=cHexCosSin(...argumentArray);
+	cosSinArray[1]=realLikeMag01;
+	cosSinArray[3]=imLikeMag01;
+
+
+	if (cosSinArray[0]==undefined){
+		if (a==4 && c==0){	cosSinArray[0]=2; cosSinArray[2]=10;}
+		if (a==4 && c==6){	cosSinArray[0]=2; cosSinArray[2]=4;}
+		if (a==10 && c==0){	cosSinArray[0]=2; cosSinArray[2]=10;}
+		if (a==10 && c==6){	cosSinArray[0]=2; cosSinArray[2]=4;}
+
+		if (a==8 && c==10){	cosSinArray[0]=4; cosSinArray[2]=6;}
+		if (a==8 && c==4){	cosSinArray[0]=4; cosSinArray[2]=0;}
+		if (a==2 && c==10){	cosSinArray[0]=4; cosSinArray[2]=6;}
+		if (a==2 && c==4){	cosSinArray[0]=4; cosSinArray[2]=0;}
+	
+	
+	}
+
+
+
+return cosSinArray;
+
+}
+
+console.log(cHexSqrt(2,5,10,3));
+console.log(cHexNaturalExponent(4,.64,6, 2.327,2));
+
+
+function cHexModulusNatural(a,b,c,d){
+
+const conjProductArray=[];
+let cStar = (c+6)%12;
+//let naturalInterval=conjProductArray.push(...cHexMultiply(a,b,c,d,a,b,cStar,d));
+
+conjProductArray.push(...cHexMultiply(a,b,c,d,a,b,cStar,d));
+
+const sqrtArray=cHexSqrt(...conjProductArray);
+
+//SQRT FUNCTION!!!!!
+
+
+//returns an array containing a sign, real-like magnitude, and two zeros.
+return sqrtArray;
+
+}
+ 
+
+function cHexModulusEuclidean(a,b,c,d){
+
+	let euclideanInterval=Math.sqrt((b**2)+(d**2));
+//returns a Real number >=0
+return euclideanInterval;
+
+}
+
+
+
+
+
+function cHexExpPowerSeries(a,b,c,d,n){
+//recommend n<200
+//(0,1,9) yields a good approximation of e; (6,1,9) yields a good approximation of its multiplicative inverse.
+//hexapolar units not in the complex plane converge to values other than e^-1 depending on whether their roots are real-like or imaginary-like.
+//exp(s1.57)-> L0 orthant.  
+
+// for arguments > ~35 (imaginary or real!), if n=200, this function fails to return numbers). 
+
+
+function factorial(n){
+    if (n == 0)
+        return 1;
+    return n * factorial(n - 1);
+
+
+}
+
+	let consolid=consolidate(0,1,0,0,a,b,c,d);
+
+	for (let i=0; i<n-1;i++){
+	
+
+	let quotient=(cHexMultiply(...cHexNaturalExponent(a,b,c,d,(i+2)),0,(1/(factorial(i+2))),0,0));
+	
+
+	
+	consolid=consolidate(...consolid,...quotient);
+	
+	let newSum=consolid;
+
+	}
+
+	let output=consolid;
+return output;	
+
+}
+
+//if piDivisor is 4, this function fails to return numbers by index 44 (argument 35.34), including cases of i and -i
+//if piDivisor is 8, it dies by 88 (arg 34.95)
+//if piDivisor is 16, it dies by 177 (arg 34.95)
+//if piDivisor is 32, it dies by 354 (arg 34.852043500761766) 
+//256 -> (arg 34.778412422943255)
+//2 -> (arg 36.12831551628262)
+//1 -> (arg 37.69911184307752)
+
+	const moduliArray=[];
+
+//data points. lots of data points. piDivisor is how many data points per graph.
+	let piDivisor=360
+	//if the piMultiple ~36, the function fails. This is most obvious for i or -i as its output magnitudes very close to 1 deviate more.
+	let piMultiple=24;
+	for (let i=0; i<(piDivisor*piMultiple); i++){
+
+
+//console.log(((Math.PI/piDivisor)*(i+1)) + " " +  " " + i, cHexExpPowerSeries(0,0,0,((Math.PI/piDivisor)*(i+1)),200));
+ //cHexExpPowerSeries(0,1,0,0,200),
+//cHexExpPowerSeries(2,1,0,0,200),
+//cHexExpPowerSeries(4,1,0,0,200),
+//cHexExpPowerSeries(6,1,0,0,200),
+//cHexExpPowerSeries(8,1,0,0,200),
+//cHexExpPowerSeries(10,1,0,0,200),
+
+
+//cHexExpPowerSeries(0,((Math.PI/piDivisor)*(i+1)),0,0,200),
+
+//although insufficiently precise, cHexExpPowerSeries seems periodic (or self-similar?) 6pi for s^1, s^5, s^7, s^11 and periodic 2pi for s^3 & s^9;   s^11 and s^1 have differing signs and like magnitudes, s^5 & s^11 417,--s^1 & s^7 817, 
+
+
+//cHexModulusEuclidean(...cHexExpPowerSeries(0,0,0,((Math.PI/piDivisor)*(i+1)),200)),
+//cHexModulusNatural(...cHexExpPowerSeries(0,0,0,((Math.PI/piDivisor)*(i+1)),200)),
+
+//cHexExpPowerSeries(0,0,2,((Math.PI/piDivisor)*(i+1)),200),
+//cHexModulusNatural(...cHexExpPowerSeries(0,0,2,((Math.PI/piDivisor)*(i+1)),200)));
+
+
+
+const naturalModulusMag=[];
+
+naturalModulusMag.push(...cHexModulusNatural(...cHexExpPowerSeries(0,0,0,((Math.PI/piDivisor)*(i+1)),200)));
+
+//console.log(naturalModulusMag);
+
+
+let nModMag=naturalModulusMag[1];
+
+
+
+
+moduliArray.push(((Math.PI/piDivisor)*(i+1)),cHexModulusEuclidean(...cHexExpPowerSeries(0,0,0,((Math.PI/piDivisor)*(i+1)),200)), nModMag, cHexModulusEuclidean(...cHexExpPowerSeries(0,0,2,((Math.PI/piDivisor)*(i+1)),200)));
+
+
+
+
+
+}
+
+//console.log(moduliArray.toString());
+//cHexExpPowerSeries(0,0,4,((Math.PI/piDivisor)*(i+1)),200),
+
+
+//cHexExpPowerSeries(0,0,6,((Math.PI/piDivisor)*(i+1)),200),
+
+
+//cHexExpPowerSeries(0,0,8,((Math.PI/piDivisor)*(i+1)),200),
+
+
+//cHexExpPowerSeries(0,0,10,((Math.PI/piDivisor)*(i+1)),200));
+
+
+
+
+//component magnitudes for imaginary-like units are identical for signs (s^2 and s^8: i or -i) and (s, s^4, s^6, s^10) 
+
+//console.log(" " + i + " ", exponentiateMe(4,((Math.PI/256)*16),6,((Math.PI/256)*16),(2+i)));
+
+
+</script>
+
+
+<canvas id="expCanvas" width="1000" height="200" style="border:1px solid grey"></canvas>
+
+<!--
+<a id="download2" download="cHex FractZm .jpg" href="" onclick="download_img(this);">Download zoomin to cHex FractZm.jpg</a>
+-->
+
+
+      <script type="text/javascript">
+
+
+
+
+
+var outputBoxSize=1000;
+
+const canvasExp = document.getElementById("expCanvas");
+const ctxE = canvasExp.getContext("2d");
+ctxE.imageSmoothingEnabled = true;
+ctxE.imageSmoothingQuality = "high";
+canvasExp.height = canvasExp.width;
+ctxE.transform(1, 0, 0, -1, 0, canvasExp.height)
+
+download_img = function(elll) {
+  // get image URI from canvas object
+  var imageURI = canvasE.toDataURL("image/realOrthantSign imOrthantSign");
+  elll.href = imageURI;
+};
+
+const imgDataE = ctxE.createImageData(outputBoxSize, outputBoxSize);
+
+
+let scaleFactor01=outputBoxSize/piMultiple;
+
+
+
+
+
+//Euclidean modulus
+
+ctxE.fillStyle = "red";
+for (let i = 0; i < moduliArray.length-1; i++) {
+  let x = moduliArray[i*4];
+  let y = moduliArray[(i*4)+1];
+  ctxE.beginPath();
+  ctxE.ellipse(x*scaleFactor01, (y*(outputBoxSize-50)), 2, 2, 0, 0, Math.PI * 2);
+  ctxE.fill();
+}
+
+
+//Natural modulus
+ctxE.fillStyle = "purple";
+for (let i = 0; i < moduliArray.length-1; i++) {
+  let x = moduliArray[i*4];
+  let y = moduliArray[(i*4)+2];
+  ctxE.beginPath();
+  ctxE.ellipse(x*scaleFactor01, (y*(outputBoxSize-50)), 2, 2, 0, 0, Math.PI * 2);
+  ctxE.fill();
+
+
+  
+//  console.log(x,y);
+  
+  
+}
+
+//the complex case (i=s^3) such that Euclidean and natural modulus are equal
+ctxE.fillStyle = "black";
+for (let i = 0; i < moduliArray.length-1; i++) {
+  let x = moduliArray[i*4];
+  let y = moduliArray[(i*4)+3];
+  ctxE.beginPath();
+  ctxE.ellipse(x*scaleFactor01, (y*(outputBoxSize-50)), 2, 2, 0, 0, Math.PI * 2);
+  ctxE.fill();
+ 
+//  console.log(x,y);
+  
+}
+
+
+
+//draw a vertical line every scaleFactor01/2
+
+for (let i=1; i<piMultiple*2; i++){
+// Define a new path
+ctxE.beginPath();
+
+// Set a start-point
+ctxE.moveTo((scaleFactor01/2)*i, 0);
+
+// Set an end-point
+ctxE.lineTo((scaleFactor01/2)*i, 800);
+
+// Stroke it (Do the Drawing)
+ctxE.stroke();
+
+}
+
+
+
+//        document.write('<a id="download2" download="cHex FractZm s' + piMultiple + 's' + outputBoxSize + '.jpg" href="" onclick="download_img(this);">Download cHexPowerSeriesGraph.jpg</a>')
+
+
+
+
+</script>
+
