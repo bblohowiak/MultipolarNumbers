@@ -1,3 +1,4 @@
+
 function cHexArgument(a,b,c,d) {
 //combination of a&c indicates which cycle of exponentiation, cycleID=1->s^theta, cycleID=2 s5^theta, cycleID=0->s3^theta
 //not for use with orthants that a signed s under repeat self-multiplication bypasses
@@ -121,8 +122,8 @@ if (b*d!=0){
 
 }
 
+	const outputArray=[cycleID, outputTheta];
 
 
-
-return outputTheta;
+return outputArray;
 }
