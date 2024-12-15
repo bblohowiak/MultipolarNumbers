@@ -101,11 +101,11 @@ if (b*d!=0){
 //if pure real, s5^x cycle
 	} else if (d==0 && cycleID==2){
 		if (a==0){var outputTheta=(Math.PI/2)*(0);}
-		if (a==2){var outputTheta=(Math.PI/2)*(2);}
-		if (a==4){var outputTheta=(Math.PI/2)*(4);}
+		if (a==2){var outputTheta=(Math.PI/2)*(10);}
+		if (a==4){var outputTheta=(Math.PI/2)*(8);}
 		if (a==6){var outputTheta=(Math.PI/2)*(6);}
-		if (a==8){var outputTheta=(Math.PI/2)*(8);}
-		if (a==10){var outputTheta=(Math.PI/2)*(10);}
+		if (a==8){var outputTheta=(Math.PI/2)*(4);}
+		if (a==10){var outputTheta=(Math.PI/2)*(2);}
 	}
 
 
