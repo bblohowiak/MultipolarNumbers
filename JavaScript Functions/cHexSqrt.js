@@ -39,7 +39,8 @@ const cosSinArray=cHexCosSin(...argumentArray);
 	
 	}
 
-
+	if (cosSinArray[1]==0){cosSinArray[0]=0;}
+	if (cosSinArray[3]==0){cosSinArray[2]=0;}
 
 return cosSinArray;
 
