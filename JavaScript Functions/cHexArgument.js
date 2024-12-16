@@ -82,11 +82,11 @@ if (b*d!=0){
 	var outputTheta=orthantEntryDistance+betweenMeasure;
 } else {
 //if pure imaginary, s^x cycle
-	if (b==0 && cycleID==1){
+	if ((b==0 && cycleID==1) && d!=0){
 		var outputTheta=(Math.PI/2)*(c+1);
 //if pure real, s^x cycle
 	} else if (d==0 && cycleID==1){
-		var outputTheta=(Math.PI/2)*(c);
+		var outputTheta=(Math.PI/2)*(a);
 	}
 
 
@@ -123,7 +123,11 @@ if (b*d!=0){
 }
 
 	const outputArray=[cycleID, outputTheta];
-
+	
+	if (b+d==0){
+	outputArray[0]=[999];
+	outputArray[1]=[999];
+	}
 
 return outputArray;
 }
