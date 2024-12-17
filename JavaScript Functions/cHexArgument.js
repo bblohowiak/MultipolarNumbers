@@ -73,7 +73,7 @@ function cHexArgument(a,b,c,d) {
 	let orthantEntryDistance=((Math.PI)/2)*orthantIndex;
 
 if (b*d!=0){
-	if ((a==c || ((a-c)%4)==0)||(c-a==2)){
+	if (orthantIndex%2==0){{
 		var betweenMeasure=Math.atan2(d, b);
 } else {
 		var betweenMeasure=Math.atan2(d, -b)-(Math.PI/2);
