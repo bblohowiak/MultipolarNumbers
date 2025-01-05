@@ -1,0 +1,2830 @@
+<!DOCTYPE html>
+<html>
+<body>
+
+<h2>Complex Hexapolar Fractal Visualization by Ben Blohowiak</h2>
+//symmetry as clue to underlying patterns, not solely for aesthetics
+<p id="demo"></p>
+
+<script>
+//This is an early draft version; pretty rough but can give some good outputs.
+//!!!!
+//WARNING! One orthant at a time with the zoom--spanning the origin with a nonzero zoomIndex is NOT (yet) supported!!!! IT WILL BE WRONG.
+// 
+//!!!!
+
+//whichFractal values: 1 is Mandelbrot, 3 is Tricorn, 5 is MandelbrotS, 6 is TricornS, 7 is TricornS2
+var whichFractal = 5;
+//fourQuadrantBypass is made for zooming in to one orthant; 0 false, 1 true.
+var fourQuadrantBypass=0;
+//at current resolution, seems to be diminishing returns for maxIterations>50, though I tend to use 100 for 2k images.
+var maxIterations = 100;
+var escapeMagnitude =4;
+
+var upperLeftX = 2;
+var upperLeftY = 0;
+
+//HERE BE MONSTERS if zoomIndex>~43! X values become indiscernible.
+var zoomIndex = 0;
+var magFactor = .5*(2**zoomIndex);
+//"Default" is a left x value of 2, y of 0, with a magnification of .5. (Double magnification factor to halve scope--or just increment zoomIndex.) Magnification was built for one-orthant mode, so anticipate some possible disorientation in four-orthant mode.
+
+var oneOrthantMode=1;
+//oneOrthantMode=1 for true. In one-orthant mode, all real-like components increase in magnitude from left to right. Imaginary-like components increase from bottom to top.
+
+//range of 2pi for mode2ModuloIterationSelectionParameter (as used, periodic at one pi AKA pi)--try 0-1.57 , multiples of .3925 or .523 or .0157 recommended.
+var mode2ModuloIterationSelectionParameter=0*.0157;
+var mode2ModuloOffset=maxIterations*(Math.abs(Math.sin(mode2ModuloIterationSelectionParameter)));
+
+//if mode3ModuloIterationSelectionParameter is 100, set is yellow; if 0, set black with bioluminescent-type glow. 25 gives a yellow periphery with teal set. 75 gives a chartreuse set with dark navy---0 or 25 best IMO 
+var mode3ModuloIterationSelectionParameter=50*.0157;
+var mode3ModuloOffset=maxIterations*(Math.abs(Math.sin(mode3ModuloIterationSelectionParameter)));
+
+//25 or 75 or 0 or 100
+var mode4ModuloIterationSelectionParameter=75*.0157;
+var mode4ModuloOffset=maxIterations*(Math.abs(Math.sin(mode4ModuloIterationSelectionParameter)));
+//modulus0 is for a semi-natural zz* computation; 1 is for full natural; other values go Euclidean
+var modulus = 1;
+
+var colorMode=4;
+//mode 0 is the first iteration, a high-contrast rotation of eight tones. I realized this is unnecessarily ableist (and obscures iteration counts) so I built other options.
+//mode 1 correlates escapecount to brightness and looks like a silvery daguerreotype if atop a white background
+//mode 2 also correlates escapecount to brightness and, with mode2ModuloIterationSelectionParameter=0, is mostly black with white correlating to an iteration specified by the mode2ModuloOffset variable (points on the plane that escaped the iteration prior to maximum appear luminescent). [75 looks nice IMO]
+//mode 3 emulates viridis from matplotlib with RGB ranges 253-68 (midpoint ~31); 231, 1; 37-84 (midpoint ~140); mode 3 also has a mode3ModuloOffset parameter. (try fewer maximum iterations to get the most out of this)
+//mode 4 emulates plasma from matplotlib with RGB ranges 240-13 (midpoint ~204); 249, 8 (midpoint ~71); 33-135 (midpoint ~120); mode 4 also has a mode4ModuloOffset parameter (try 25!).
+
+//sign values should be 0 or even (n%2=0). "Default" is real 0, im 2 for conventionally oriented complex plane quadrants.
+var realOrthantSign = 0;
+var imOrthantSign = 2;
+
+//exponent must be positive integer (for now--there is a generalization of the exponential function in the repo defined as a power series; it demonstrates functional equivalency with convergence to e and e^-1 but loses accuracy as arguments (i.e., thetas or co-factors of an imaginary unit) expressed as multiples of pi increase)
+let exponent = 3;
+
+//"for quadrant sets separated by a rotation of i (s^3), go with default of 3. that is what is presently hard-coded a few hundred lines below, but a subsequent version will utilize this as a parameter.""--THIS COMMENT outdated with hard-coded symmetry modes that are function-dependent.
+var quadrantRotationFactor=3;
+
+
+//typical users will not want to mess with these values
+//outputBoxSize default outputBoxSize is for one orthant, pixel distance .04
+var outputBoxSize = 400;
+var defaultPixelDistance = 1/(outputBoxSize);
+var magPixelDistance = defaultPixelDistance/magFactor;
+let realSign = realOrthantSign;
+let imSign = imOrthantSign;
+
+
+</script>
+the number s is not in the complex plane, but it is in its complex hexapolar extension.<br>(s^3=i; s^6=-1; s^9=-i; s^12=1) --> the number "1+i" is in the hexapolar orthant indicated by the ordered pair of signed units (s^0,s^2); <br>the number "-1-i" is in the hexapolar orthant indicated by the ordered pair of signed units (s^6,s^8).
+ <br>
+the exponent in this recursive function is:
+ <script type="text/javascript">
+        document.write(exponent)
+      </script>
+
+
+the iteration maximum is:
+ <script type="text/javascript">
+        document.write(maxIterations)
+      </script>
+      
+  the maximum modulus is:
+ <script type="text/javascript">
+        document.write(escapeMagnitude)
+      </script>    
+      
+      
+<br>
+the magnification factor is:
+ <script type="text/javascript">
+        document.write(magFactor)
+      </script>
+
+
+
+<br>
+
+
+  the value for quadrant I realOrthantSign is: s^
+      <script type="text/javascript">
+        document.write(realOrthantSign)
+      </script>
+<br>the horizontal extent of quadrant I has a magnitude of: 
+ 
+      <script type="text/javascript">
+        document.write(upperLeftX)
+      </script>
+<br>
+
+<br>
+  the value for quadrant I imOrthantSign is: s^
+      <script type="text/javascript">
+        document.write(imOrthantSign)
+      </script>
+<br>the bottom row of quadrant I has a height of:
+      <script type="text/javascript">
+        document.write(upperLeftY)
+      </script>
+<br>
+
+
+<br>
+
+<script>
+
+//BEGIN FUNCTION DECLARATIONS
+
+
+function consolidate(a,b,c,d,e,f,g,h){
+//a,c,e,g must be 0 if mod2, i.e. even or 0
+	const consolidArray=[];
+	let realSign=0;
+	let imSign=0;
+	let realMag=0;
+	let imMag=0;
+
+	if (a==e){
+		realMag=b+f;
+	} else {
+		realMag=Math.abs(b-f);
+}
+
+	if (c==g){
+		imMag=d+h;
+	} else {
+		imMag=Math.abs(d-h);
+}
+
+	if (a==e && (b+f) != 0){
+	realSign=a;	
+	}
+	
+	if(b>f){
+	realSign=a;
+} 	
+
+	if (f>b){
+	realSign=e;
+} 	
+
+	if (b+f==0){
+	realSign=0;	
+}
+
+	if (c==g && (d+h) != 0){
+	imSign=c;	
+	}
+	
+	if(d>h){
+	imSign=c;
+} 	
+
+	if (h>d){
+	imSign=g;
+} 	
+
+	if (d+h==0){
+	imSign=0;	
+}
+
+	consolidArray.push(realSign,realMag,imSign,imMag);
+
+consolid=consolidArray;
+
+return consolid;
+}	
+
+
+
+function hexMultiply(a,b,c,d){
+//a,c must be even or 0
+	const productArray=[];
+	let realSign1=0;
+	let realSign2=0;
+	let realMag1=0;
+	let realMag2=0;
+	let productMag=0;
+	let productSign=0;
+
+	if (b == 0 || d==0){
+	productSign=0;
+	} else {
+	productSign=(a+c)%12;
+	}
+
+	productMag=b*d;
+
+	productArray.push(productSign,productMag);
+
+hexProduct = productArray;
+
+return hexProduct;
+}	
+
+
+function cHexConjugate(a,b,c,d){
+//a,c must be even or 0
+	let newImSign=(c+6)%12;
+	const outputArray=[a,b,newImSign,d];
+	
+return outputArray;
+}
+
+
+
+function cHexMultiply(a,b,c,d,e,f,g,h){
+//a,c,e,g must be 0 if mod2, i.e. even or 0
+	const productArray=[];
+	const productArray1=[];
+	const productArray2=[];
+	const consolidArray2=[];
+	const productArray3=[];
+	let productRealSign=0;
+	let productImSign=0;
+	let productRealMag=0;
+	let productImMag=0;
+	
+//First, Last...
+	productArray1.push(...hexMultiply(a,b,e,f));
+	productArray1.push(...hexMultiply(c,d,e,f));
+	productArray2.push(...hexMultiply(c,d,g+2,h));
+	productArray2.push(...hexMultiply(a,b,g,h));
+	const consolidArray1=productArray1.concat(...productArray2);
+	consolidArray2.push(...consolidate(...consolidArray1));
+
+cHexProduct = consolidArray2;
+
+return cHexProduct;
+}	
+
+
+
+
+
+
+function exponentiateMe(a,b,c,d,e){
+////e is exponent, must be positive integer greater than two (for now). a,c are signs expressed as even exponents modulo 12. b, d are magnitudes.
+
+	const realSign=[a];
+	const realMag=[b];
+	const imSign=[c];
+	const imMag=[d];
+	const productArray=[];
+	const factorArray=[];
+	const hexProduct=[];
+
+for  (let i = 0; i < e-1; i++){
+	
+	let realSign01=realSign[i];
+	let realMag01=realMag[i];
+	let imSign01=imSign[i];
+	let imMag01=imMag[i];
+	
+	productArray.push(...cHexMultiply(a,b,c,d,realSign01,realMag01,imSign01,imMag01));
+	
+	realSign.push(productArray[(i*4)]);
+	realMag.push(productArray[(i*4)+1]);
+	imSign.push(productArray[(i*4)+2]);
+	imMag.push(productArray[(i*4)+3]);
+
+}
+
+	arrayLength=productArray.length;
+	
+	
+	let outputSign=productArray[arrayLength-4];
+	let outputMag=productArray[arrayLength-3];
+	let outputSign2=productArray[arrayLength-2];
+	let outputMag2=productArray[arrayLength-1];
+hexProduct.push(outputSign,outputMag,outputSign2,outputMag2);
+
+return hexProduct;
+}	
+
+
+
+function cHexCosSin(a,b) {
+//a indicates which cycle of exponentiation, csCycleID=1->s^theta, csCycleID=2 s5^theta, csCycleID=0->s3^theta
+//b indicates a distance in radians
+//not for use with rootless orthants
+
+	let argumentNose=b%Math.PI;
+	let csrealMag=Math.abs(Math.cos(argumentNose));
+	let csimMag=Math.sin(argumentNose);
+	let orthantCount=(Math.floor(b/(Math.PI/2)))%12;
+	
+	if (a==0 && orthantCount%4==0){
+	var csrealSign=0;
+	var csimSign=2;}
+	if (a==0 && orthantCount%4==1){
+	var csrealSign=6;
+	var csimSign=2;}
+	if (a==0 && orthantCount%4==2){
+	var csrealSign=6;
+	var csimSign=8;}
+	if (a==0 && orthantCount%4==3){
+	var csrealSign=0;
+	var csimSign=8;}
+
+	if (a==1 && (orthantCount==0||orthantCount==12)){
+	var csrealSign=0;
+	var csimSign=0;}
+	if (a==1 && orthantCount==1){
+	var csrealSign=2;
+	var csimSign=0;}
+	if (a==1 && orthantCount==2){
+	var csrealSign=2;
+	var csimSign=2;}
+	if (a==1 && orthantCount==3){
+	var csrealSign=4;
+	var csimSign=2;}
+	if (a==1 && orthantCount==4){
+	var csrealSign=4;
+	var csimSign=4;}
+	if (a==1 && orthantCount==5){
+	var csrealSign=6;
+	var csimSign=4;}
+	if (a==1 && orthantCount==6){
+	var csrealSign=6;
+	var csimSign=6;}
+	if (a==1 && orthantCount==7){
+	var csrealSign=8;
+	var csimSign=6;}
+	if (a==1 && orthantCount==8){
+	var csrealSign=8;
+	var csimSign=8;}
+	if (a==1 && orthantCount==9){
+	var csrealSign=10;
+	var csimSign=8;}
+	if (a==1 && orthantCount==10){
+	var csrealSign=10;
+	var csimSign=10;}
+	if (a==1 && orthantCount==11){
+	var csrealSign=0;
+	var csimSign=10;}
+
+	if (a==2 && (orthantCount==0||orthantCount==12)){
+	var csrealSign=0;
+	var csimSign=4;}
+	if (a==2 && orthantCount==1){
+	var csrealSign=10;
+	var csimSign=4;}
+	if (a==2 && orthantCount==2){
+	var csrealSign=10;
+	var csimSign=2;}
+	if (a==2 && orthantCount==3){
+	var csrealSign=8;
+	var csimSign=2;}
+	if (a==2 && orthantCount==4){
+	var csrealSign=8;
+	var csimSign=0;}
+	if (a==2 && orthantCount==5){
+	var csrealSign=6;
+	var csimSign=0;}
+	if (a==2 && orthantCount==6){
+	var csrealSign=6;
+	var csimSign=10;}
+	if (a==2 && orthantCount==7){
+	var csrealSign=4;
+	var csimSign=10;}
+	if (a==2 && orthantCount==8){
+	var csrealSign=4;
+	var csimSign=8;}
+	if (a==2 && orthantCount==9){
+	var csrealSign=2;
+	var csimSign=8;}
+	if (a==2 && orthantCount==10){
+	var csrealSign=2;
+	var csimSign=6;}
+	if (a==2 && orthantCount==11){
+	var csrealSign=0;
+	var csimSign=6;}
+
+
+
+
+/*
+	if (((a==0 && c==0)||a==0 && c==2)||(a==0 && c==4)){ var orthantIndex=0;}
+	if (((a==2 && c==0)||a==6 && c==2)||(a==10 && c==4)) {var orthantIndex=1;}
+	if (((a==2 && c==2)||a==6 && c==8)||(a==10 && c==2)) {var orthantIndex=2;}
+	if (((a==4 && c==2 )||a==0 && c==8)||(a==8 && c==2)){var orthantIndex=3;}
+	if ((a==4 && c==4 )||(a==8 && c==0)){var orthantIndex=4; }
+	if ((a==6 && c==4) ||(a==6 && c==0)){var  orthantIndex=5;}
+	if ((a==6 && c==6 )||(a==6 && c==10)) {var orthantIndex=6;}
+	if ((a==8 && c==6)||(a==4 && c==10)) {var orthantIndex=7;}
+	if ((a==8 && c==8 )||(a==4 && c==8)){var orthantIndex=8;}
+	if ((a==10 && c==8 )||(a==2 && c==8)){var orthantIndex=9;}
+	if ((a==10 && c==10 )||(a==2 && c==6)){var orthantIndex=10;}
+	if ((a==0 && c==10)||(a==0 && c==6)) {var orthantIndex=11;}
+
+*/
+
+
+	if (realMag==0){
+	var csrealSign=0;
+	}
+	
+	if (imMag==0){
+	var csimSign=0;
+	}
+	
+	
+	outputArray=[csrealSign,csrealMag,csimSign,csimMag];
+
+
+
+return outputArray;
+}
+
+
+
+
+
+
+function cHexArgument(a,b,c,d) {
+//combination of a&c indicates which cycle of exponentiation, cycleID=1->s^theta, cycleID=2 s5^theta, cycleID=0->s3^theta
+//not for use with rootless orthants
+//let's compute cycleID
+
+	if ((a==0 && c==2)){var cycleID=0;}
+	if ((a==6 && c==2)) {var cycleID=0;}
+	if ((a==6 && c==8)) {var cycleID=0;}
+	if ((a==0 && c==8)){var cycleID=0;}
+
+
+	if ((a==0 && c==0)){var cycleID=1;}
+	if ((a==2 && c==0)) {var cycleID=1;}
+	if ((a==2 && c==2)){var cycleID=1;}
+	if ((a==4 && c==2 )){var cycleID=1;}
+	if ((a==4 && c==4 )){var cycleID=1;}
+	if ((a==6 && c==4)){var cycleID=1;}
+	if ((a==6 && c==6 )) {var cycleID=1;}
+	if ((a==8 && c==6)) {var cycleID=1;}
+	if ((a==8 && c==8 )){var cycleID=1;}
+	if ((a==10 && c==8 )){var cycleID=1;}
+	if ((a==10 && c==10 )){var cycleID=1;}
+	if ((a==0 && c==10)) {var cycleID=1;}
+	
+	if ((a==0 && c==4)){var cycleID=2;}
+	if ((a==10 && c==4)) {var cycleID=2;}
+	if ((a==10 && c==2)) {var cycleID=2;}
+	if ((a==8 && c==2)){var cycleID=2;}
+	if ((a==8 && c==0)){var cycleID=2;}
+	if ((a==6 && c==0)){var cycleID=2;}
+	if ((a==6 && c==10)) {var cycleID=2;}
+	if ((a==4 && c==10)) {var cycleID=2;}
+	if ((a==4 && c==8)){var cycleID=2;}
+	if ((a==2 && c==8)){var cycleID=2;}
+	if ((a==2 && c==6)){var cycleID=2;}
+	if ((a==0 && c==6)) {var cycleID=2;}
+
+//how far in radians are we from 1?
+
+//if a=0 and c=0 then between 0-pi/2 radians
+//if a=2 and c=0 then between pi/2-pi radians
+//if a=2 and c=0 then between pi-3pi/2 radians
+//if a=4 and c=0 then between 3pi/2-2 radians
+//if a=4 and c=0 then between 2 0-pi/2 radians--increment factor every four
+
+//how do you know exactly how much between? Each orthant is at most pi/2 radians, so how many radians from axis of orthant entry (aoeRads) to add to the cumulative number of radians at point of orthant entry, which assumes an orientation provided by the path of the imaginary-like unit; for a given orthant, what is its point of entry?
+
+//if a=0 and c=0 then real axis point of entry
+//if a=2 and c=0 then imaginary axis point of entry
+//if a=2 and c=2 then real
+//if a=4 and c=2 then imaginary
+//if a=4 and c=4 then 
+//if a=6 and c=4 then 
+//if a=6 and c=6 then 
+//if a=8 and c=6 then 
+//if a=8 and c=8 then 
+//if a=10 and c=8 then 
+//if a=10 and c=10 then 
+//if a=0 and c=10 then 
+
+//AKA if a=c, real axis point of entry ELSE imaginary axis point of entry
+//if in an imaginary-axis point of entry orthant, use cos(-1*b)-(Math.PI/2) ELSE cos(b)
+
+//Math.atan2() returns  distance in radians between the ositive xaxis and (x, y), for some reason in reverse sequence Math.atan2(y, x).
+
+
+
+	if (((a==0 && c==0)||a==0 && c==2)||(a==0 && c==4)){ var orthantIndex=0;}
+	if (((a==2 && c==0)||a==6 && c==2)||(a==10 && c==4)) {var orthantIndex=1;}
+	if (((a==2 && c==2)||a==6 && c==8)||(a==10 && c==2)) {var orthantIndex=2;}
+	if (((a==4 && c==2 )||a==0 && c==8)||(a==8 && c==2)){var orthantIndex=3;}
+	if ((a==4 && c==4 )||(a==8 && c==0)){var orthantIndex=4; }
+	if ((a==6 && c==4) ||(a==6 && c==0)){var  orthantIndex=5;}
+	if ((a==6 && c==6 )||(a==6 && c==10)) {var orthantIndex=6;}
+	if ((a==8 && c==6)||(a==4 && c==10)) {var orthantIndex=7;}
+	if ((a==8 && c==8 )||(a==4 && c==8)){var orthantIndex=8;}
+	if ((a==10 && c==8 )||(a==2 && c==8)){var orthantIndex=9;}
+	if ((a==10 && c==10 )||(a==2 && c==6)){var orthantIndex=10;}
+	if ((a==0 && c==10)||(a==0 && c==6)) {var orthantIndex=11;}
+
+	let orthantEntryDistance=((Math.PI)/2)*orthantIndex;
+
+if (b*d!=0){
+	if ((a==c || ((a-c)%4)==0)||(c-a==2)){
+		var betweenMeasure=Math.atan2(d, b);
+} else {
+		var betweenMeasure=Math.atan2(d, -b)-(Math.PI/2);
+}
+
+	var outputTheta=orthantEntryDistance+betweenMeasure;
+} else {
+//if pure imaginary, s^x cycle
+	if (b==0 && cycleID==1){
+		var outputTheta=(Math.PI/2)*(c+1);
+//if pure real, s^x cycle
+	} else if (d==0 && cycleID==1){
+		var outputTheta=(Math.PI/2)*(c);
+	}
+
+
+//if pure imaginary, s5^x cycle
+	if (b==0 && cycleID==2){
+		if (c==4){var outputTheta=(Math.PI/2)*(1);}
+		if (c==2){var outputTheta=(Math.PI/2)*(3);}
+		if (c==0){var outputTheta=(Math.PI/2)*(5);}
+		if (c==10){var outputTheta=(Math.PI/2)*(7);}
+		if (c==8){var outputTheta=(Math.PI/2)*(9);}
+		if (c==6){var outputTheta=(Math.PI/2)*(11);}
+//if pure real, s5^x cycle
+	} else if (d==0 && cycleID==2){
+		if (a==0){var outputTheta=(Math.PI/2)*(0);}
+		if (a==2){var outputTheta=(Math.PI/2)*(2);}
+		if (a==4){var outputTheta=(Math.PI/2)*(4);}
+		if (a==6){var outputTheta=(Math.PI/2)*(6);}
+		if (a==8){var outputTheta=(Math.PI/2)*(8);}
+		if (a==10){var outputTheta=(Math.PI/2)*(10);}
+	}
+
+
+//if pure imaginary, s3^x cycle
+	if (b==0 && cycleID==0){
+		if (c==2){var outputTheta=(Math.PI/2)*(1);}
+		if (c==8){var outputTheta=(Math.PI/2)*(3);}
+//if pure real, s3^x cycle
+	} else if (d==0 && cycleID==0){
+		if (a==0){var outputTheta=(Math.PI/2)*(0);}
+		if (a==6){var outputTheta=(Math.PI/2)*(2);}	}
+
+
+
+}
+
+
+
+
+return outputTheta;
+}
+
+
+//console.log(cHexArgument(6,1,2,1).toString());
+
+/* THIS IS ROUGH; IT ONLY KINDOF WORKS
+function cHexFractionalExponent(a,b,c,d,f){
+//a and c are signs expressed as even numbers, b and d are magnitudes
+//e-h is same for exponent; assuming efgh is a positive real number
+
+
+ //(a+bi)^(c)=
+ //(a^2+b^2)^(c/2)
+ // × {cos[c arg(a+ib)]+isin[c arg(a+ib)+]}.  	
+
+	let a2b2=(b**2)+(d**2);
+	let firstFactor=a2b2**(f/2);
+	let baseArgument=cHexArgument(a,b,c,d);
+//	const cArgProduct=cHexMultiply(0,baseArgument,0,0,e,f,0,0);
+	const cArgProduct=baseArgument*f;
+	
+//to get cos&sin, need to know which cycleID	
+
+	if ((a==0 && c==2)){var cycleID=0;}
+	if ((a==6 && c==2)) {var cycleID=0;}
+	if ((a==6 && c==8)) {var cycleID=0;}
+	if ((a==0 && c==8)){var cycleID=0;}
+
+
+	if ((a==0 && c==0)){var cycleID=1;}
+	if ((a==2 && c==0)) {var cycleID=1;}
+	if ((a==2 && c==2)){var cycleID=1;}
+	if ((a==4 && c==2 )){var cycleID=1;}
+	if ((a==4 && c==4 )){var cycleID=1;}
+	if ((a==6 && c==4)){var cycleID=1;}
+	if ((a==6 && c==6 )) {var cycleID=1;}
+	if ((a==8 && c==6)) {var cycleID=1;}
+	if ((a==8 && c==8 )){var cycleID=1;}
+	if ((a==10 && c==8 )){var cycleID=1;}
+	if ((a==10 && c==10 )){var cycleID=1;}
+	if ((a==0 && c==10)) {var cycleID=1;}
+	
+	if ((a==0 && c==4)){var cycleID=2;}
+	if ((a==10 && c==4)) {var cycleID=2;}
+	if ((a==10 && c==2)) {var cycleID=2;}
+	if ((a==8 && c==2)){var cycleID=2;}
+	if ((a==8 && c==0)){var cycleID=2;}
+	if ((a==6 && c==0)){var cycleID=2;}
+	if ((a==6 && c==10)) {var cycleID=2;}
+	if ((a==4 && c==10)) {var cycleID=2;}
+	if ((a==4 && c==8)){var cycleID=2;}
+	if ((a==2 && c==8)){var cycleID=2;}
+	if ((a==2 && c==6)){var cycleID=2;}
+	if ((a==0 && c==6)) {var cycleID=2;}
+
+
+
+	const unscaledProduct=cHexCosSin(cycleID,cArgProduct);
+
+
+	
+		const outputArray=cHexMultiply(unscaledProduct[0],unscaledProduct[1],unscaledProduct[2],unscaledProduct[3],0,firstFactor,0,0);
+
+return outputArray;
+}
+*/
+
+function Mandelbrot(a,b,c,d,e,f){
+//accepts complex hexapolar, exponent (e.g., minimum z^2 but could be z^e  if e is positive integer)
+//f is the maximum number of iterations
+
+	const newZArray=[a,b,c,d];
+	let escapeCount=0;
+	let zRealSign=newZArray[0];
+	let zRealMag=newZArray[1];
+	let zImSign=newZArray[2];		
+	let zImMag=newZArray[3];
+	let tooBig=0;
+	
+for  (let i = 0; i < f+1 && tooBig <=escapeMagnitude; i++){
+	
+	zRealSign=newZArray[(i*4)];
+	zRealMag=newZArray[(i*4)+1];
+	zImSign=newZArray[(i*4)+2];		
+	zImMag=newZArray[(i*4)+3];
+	
+	if (modulus == 0){
+
+//const conjArray=[];
+//conjArray.push(cHexConjugate(zRealSign,zRealMag,zImSign,zImMag));
+
+const conjProductArray=[];
+let zImSignConj = (zImSign+6)%12;
+conjProductArray.push(...cHexMultiply(zRealSign,zRealMag,zImSign,zImMag,zRealSign,zRealMag,zImSignConj,zImMag));
+
+
+//console.log(conjProductArray.toString());
+
+	tooBig=conjProductArray[1];
+
+} else if (modulus == 1){
+	
+const conjProductArray=[];
+let zImSignConj = (zImSign+6)%12;
+conjProductArray.push(...cHexMultiply(zRealSign,zRealMag,zImSign,zImMag,zRealSign,zRealMag,zImSignConj,zImMag));
+
+
+//console.log(conjProductArray.toString());
+
+	if (conjProductArray[0] == 0){
+	tooBig=conjProductArray[1];
+} else {
+	tooBig=0;
+}
+	
+	
+	
+} else {
+	tooBig=(zRealMag**2)+(zImMag**2);
+}
+
+newZArray.push(...consolidate(...exponentiateMe(zRealSign,zRealMag,zImSign,zImMag,e),a,b,c,d));
+
+//these newZ array values might come in handy for a Buddhabrot variation...
+
+	escapeCount=i;
+
+}
+return escapeCount;
+//return zRealSign;
+}
+
+
+function MandelbrotS(a,b,c,d,e,f){
+//accepts complex hexapolar, exponent (e.g., minimum z^2 but could be z^e  if e is positive integer)
+//f is the maximum number of iterations
+
+	const newZArray=[a,b,c,d];
+	let escapeCount=0;
+	let zRealSign=newZArray[0];
+	let zRealMag=newZArray[1];
+	let zImSign=newZArray[2];		
+	let zImMag=newZArray[3];
+	let tooBig=0;
+	
+for  (let i = 0; i < f+1 && tooBig <=escapeMagnitude; i++){
+	
+	zRealSign=newZArray[(i*4)];
+	zRealMag=newZArray[(i*4)+1];
+	zImSign=newZArray[(i*4)+2];		
+	zImMag=newZArray[(i*4)+3];
+	
+	if (modulus == 0){
+
+//const conjArray=[];
+//conjArray.push(cHexConjugate(zRealSign,zRealMag,zImSign,zImMag));
+
+const conjProductArray=[];
+let zImSignConj = (zImSign+6)%12;
+conjProductArray.push(...cHexMultiply(zRealSign,zRealMag,zImSign,zImMag,zRealSign,zRealMag,zImSignConj,zImMag));
+
+
+//console.log(conjProductArray.toString());
+
+	tooBig=conjProductArray[1];
+
+} else if (modulus == 1){
+	
+const conjProductArray=[];
+let zImSignConj = (zImSign+6)%12;
+conjProductArray.push(...cHexMultiply(zRealSign,zRealMag,zImSign,zImMag,zRealSign,zRealMag,zImSignConj,zImMag));
+
+
+//console.log(conjProductArray.toString());
+
+	if (conjProductArray[0] == 0){
+	tooBig=conjProductArray[1];
+} else {
+	tooBig=0;
+}
+	
+	
+	
+} else {
+	tooBig=(zRealMag**2)+(zImMag**2);
+}
+
+newZArray.push(...consolidate(...exponentiateMe(...cHexMultiply(0,0,0,1,zRealSign,zRealMag,zImSign,zImMag),e),a,b,c,d));
+
+//these newZ array values might come in handy for a Buddhabrot variation...
+
+	escapeCount=i;
+
+}
+return escapeCount;
+//return zRealSign;
+}
+
+
+
+
+
+
+
+
+function Tricorn(a,b,c,d,e,f){
+//accepts complex hexapolar, exponent (e.g., minimum z^2 but could be z^e  if e is positive integer)
+//f is the maximum number of iterations
+
+	const newZArray=[a,b,c,d];
+	let escapeCount=0;
+	let zRealSign=newZArray[0];
+	let zRealMag=newZArray[1];
+	let zImSign=newZArray[2];		
+	let zImMag=newZArray[3];
+	let tooBig=0;
+	
+for  (let i = 0; i < f+1 && tooBig <=escapeMagnitude; i++){
+	
+	zRealSign=newZArray[(i*4)];
+	zRealMag=newZArray[(i*4)+1];
+	zImSign=((newZArray[(i*4)+2])+6)%12;		
+	zImMag=newZArray[(i*4)+3];
+	
+	if (modulus == 0){
+
+//const conjArray=[];
+//conjArray.push(cHexConjugate(zRealSign,zRealMag,zImSign,zImMag));
+
+const conjProductArray=[];
+let zImSignConj = (zImSign+6)%12;
+conjProductArray.push(...cHexMultiply(zRealSign,zRealMag,zImSign,zImMag,zRealSign,zRealMag,zImSignConj,zImMag));
+
+
+//console.log(conjProductArray.toString());
+
+	tooBig=conjProductArray[1];
+
+} else if (modulus == 1){
+	
+const conjProductArray=[];
+let zImSignConj = (zImSign+6)%12;
+conjProductArray.push(...cHexMultiply(zRealSign,zRealMag,zImSign,zImMag,zRealSign,zRealMag,zImSignConj,zImMag));
+
+
+//console.log(conjProductArray.toString());
+
+	if (conjProductArray[0] == 0){
+	tooBig=conjProductArray[1];
+} else {
+	tooBig=0;
+}
+	
+	
+	
+} else {
+	tooBig=(zRealMag**2)+(zImMag**2);
+}
+
+newZArray.push(...consolidate(...exponentiateMe(zRealSign,zRealMag,zImSign,zImMag,e),a,b,c,d));
+
+//these newZ array values might come in handy for a Buddhabrot variation...
+
+	escapeCount=i;
+
+}
+return escapeCount;
+//return zRealSign;
+}
+
+function TricornS(a,b,c,d,e,f){
+//accepts complex hexapolar, exponent (e.g., minimum z^2 but could be z^e  if e is positive integer)
+//f is the maximum number of iterations
+
+	const newZArray=[a,b,c,d];
+	let escapeCount=0;
+	let zRealSign=newZArray[0];
+	let zRealMag=newZArray[1];
+	let zImSign=newZArray[2];		
+	let zImMag=newZArray[3];
+	let tooBig=0;
+	
+for  (let i = 0; i < f+1 && tooBig <=escapeMagnitude; i++){
+	
+	zRealSign=newZArray[(i*4)];
+	zRealMag=newZArray[(i*4)+1];
+	zImSign=((newZArray[(i*4)+2])+6)%12;		
+	zImMag=newZArray[(i*4)+3];
+	
+	if (modulus == 0){
+
+//const conjArray=[];
+//conjArray.push(cHexConjugate(zRealSign,zRealMag,zImSign,zImMag));
+
+const conjProductArray=[];
+let zImSignConj = (zImSign+6)%12;
+conjProductArray.push(...cHexMultiply(zRealSign,zRealMag,zImSign,zImMag,zRealSign,zRealMag,zImSignConj,zImMag));
+
+
+//console.log(conjProductArray.toString());
+
+	tooBig=conjProductArray[1];
+
+} else if (modulus == 1){
+	
+const conjProductArray=[];
+let zImSignConj = (zImSign+6)%12;
+conjProductArray.push(...cHexMultiply(zRealSign,zRealMag,zImSign,zImMag,zRealSign,zRealMag,zImSignConj,zImMag));
+
+
+//console.log(conjProductArray.toString());
+
+	if (conjProductArray[0] == 0){
+	tooBig=conjProductArray[1];
+} else {
+	tooBig=0;
+}
+	
+	
+	
+} else {
+	tooBig=(zRealMag**2)+(zImMag**2);
+}
+
+newZArray.push(...consolidate(...exponentiateMe(...cHexMultiply(0,0,0,1,zRealSign,zRealMag,zImSign,zImMag),e),a,b,c,d));
+
+//these newZ array values might come in handy for a Buddhabrot variation...
+
+	escapeCount=i;
+
+}
+return escapeCount;
+//return zRealSign;
+}
+
+
+function TricornS2(a,b,c,d,e,f){
+//accepts complex hexapolar, exponent (e.g., minimum z^2 but could be z^e  if e is positive integer)
+//f is the maximum number of iterations
+
+	const newZArray=[a,b,c,d];
+	let escapeCount=0;
+	let zRealSign=newZArray[0];
+	let zRealMag=newZArray[1];
+	let zImSign=newZArray[2];		
+	let zImMag=newZArray[3];
+	let tooBig=0;
+	
+for  (let i = 0; i < f+1 && tooBig <=escapeMagnitude; i++){
+	
+	zRealSign=(newZArray[(i*4)+2])%12;
+	zRealMag=newZArray[(i*4)+3];
+	zImSign=((newZArray[(i*4)])+6)%12;		
+	zImMag=newZArray[(i*4)+1];
+	
+	if (modulus == 0){
+
+//const conjArray=[];
+//conjArray.push(cHexConjugate(zRealSign,zRealMag,zImSign,zImMag));
+
+const conjProductArray=[];
+let zImSignConj = (zImSign+6)%12;
+conjProductArray.push(...cHexMultiply(zRealSign,zRealMag,zImSign,zImMag,zRealSign,zRealMag,zImSignConj,zImMag));
+
+
+//console.log(conjProductArray.toString());
+
+	tooBig=conjProductArray[1];
+
+} else if (modulus == 1){
+	
+const conjProductArray=[];
+let zImSignConj = (zImSign+6)%12;
+conjProductArray.push(...cHexMultiply(zRealSign,zRealMag,zImSign,zImMag,zRealSign,zRealMag,zImSignConj,zImMag));
+
+
+//console.log(conjProductArray.toString());
+
+	if (conjProductArray[0] == 0){
+	tooBig=conjProductArray[1];
+} else {
+	tooBig=0;
+}
+	
+	
+	
+} else {
+	tooBig=(zRealMag**2)+(zImMag**2);
+}
+
+newZArray.push(...consolidate(...exponentiateMe(zRealSign,zRealMag,zImSign,zImMag,e),a,b,c,d));
+
+//these newZ array values might come in handy for a Buddhabrot variation...
+
+	escapeCount=i;
+
+}
+return escapeCount;
+//return zRealSign;
+}
+
+
+
+
+const realParts = [upperLeftX];
+const imParts = [upperLeftY];
+const test =[];
+const escapeCount=[];
+const escapeCount2=[];
+const escapeCount3=[];
+const escapeCount4=[];
+
+
+let text = "";
+
+
+///END OF FUNCTION DECLARATIONS
+
+
+
+let i= 0;
+while (i < outputBoxSize) {
+  text += "<br>The number is " + i;
+  realParts[i+1]=realParts[i] - magPixelDistance;
+  imParts[i+1]=imParts[i] + magPixelDistance;
+  i++;
+}
+
+
+
+for(let j = 0; j < outputBoxSize; j++){
+  for(let k = 0; k < outputBoxSize; k++){
+//pull jth realParts value (realMag) and use outputBoxSize times with kth imParts value.
+  realMag =realParts[j];
+  imMag = imParts[k];
+
+
+
+
+//add pixel escape number to escapeCount array such that every outputBoxSize is a new row
+
+	const realMagArray=[realMag];
+	const imMagArray=[imMag];
+	const realSignArray=[realOrthantSign];
+	const imSignArray=[imOrthantSign];
+	let   largestComponent = 0;
+///the real recursive right here
+
+
+	if (whichFractal == 1){
+escapeCount.push(Mandelbrot(realOrthantSign,realMag,imOrthantSign,imMag,exponent,maxIterations));
+
+	if (oneOrthantMode != 1){
+//given a pair of orthant signs, three others each s^3 rotated
+
+		if ((realOrthantSign == 8 && imOrthantSign == 8)||(realOrthantSign == 0 && imOrthantSign == 4)){
+			var orthant2RealSign=6;
+			var orthant2RealMag=1;
+			var orthant2imSign=0;
+			var orthant2imMag=0;
+			
+			var orthant3RealSign=0;
+			var orthant3RealMag=0;
+			var orthant3imSign=0;
+			var orthant3imMag=1;
+			
+			var orthant4RealSign=0;
+			var orthant4RealMag=0;
+			var orthant4imSign=6;
+			var orthant4imMag=1;
+		} else if ((realOrthantSign == 0 && imOrthantSign == 0)||(realOrthantSign == 4 && imOrthantSign == 8)){
+//symmetry for Mandelbrot
+			var orthant2RealSign=0;
+			var orthant2RealMag=0;
+			var orthant2imSign=4;
+			var orthant2imMag=1;
+			
+			var orthant3RealSign=6;
+			var orthant3RealMag=1;
+			var orthant3imSign=0;
+			var orthant3imMag=0;
+			
+			var orthant4RealSign=0;
+			var orthant4RealMag=0;
+			var orthant4imSign=10;
+			var orthant4imMag=1;
+		} else {
+			var orthant2RealSign=0;
+			var orthant2RealMag=0;
+			var orthant2imSign=2;
+			var orthant2imMag=1;
+			
+			var orthant3RealSign=6;
+			var orthant3RealMag=1;
+			var orthant3imSign=0;
+			var orthant3imMag=0;
+			
+			var orthant4RealSign=0;
+			var orthant4RealMag=0;
+			var orthant4imSign=8;
+			var orthant4imMag=1;
+		}
+
+
+
+
+	const orthant2=cHexMultiply(realOrthantSign,1,imOrthantSign,1,orthant2RealSign,orthant2RealMag,orthant2imSign,orthant2imMag);
+		const orthant3=cHexMultiply(realOrthantSign,1,imOrthantSign,1,orthant3RealSign,orthant3RealMag,orthant3imSign,orthant3imMag);
+			const orthant4=cHexMultiply(realOrthantSign,1,imOrthantSign,1,orthant4RealSign,orthant4RealMag,orthant4imSign,orthant4imMag);
+
+
+escapeCount2.push(Mandelbrot(orthant2[0],realMag,orthant2[2],imMag,exponent,maxIterations));
+escapeCount3.push(Mandelbrot(orthant3[0],realMag,orthant3[2],imMag,exponent,maxIterations));
+escapeCount4.push(Mandelbrot(orthant4[0],realMag,orthant4[2],imMag,exponent,maxIterations));
+}
+} else if (whichFractal == 3){
+
+escapeCount.push(Tricorn(realOrthantSign,realMag,imOrthantSign,imMag,exponent,maxIterations));
+
+	if (oneOrthantMode != 1){
+//given a pair of orthant signs, three others each s^3 rotated
+//...except for these four four-orthant sets
+
+
+		if ((realOrthantSign == 8 && imOrthantSign == 8)||(realOrthantSign == 0 && imOrthantSign == 4)){
+//symmetry for Tricorn
+			var orthant2RealSign=0;
+			var orthant2RealMag=0;
+			var orthant2imSign=0;
+			var orthant2imMag=1;
+			
+			var orthant3RealSign=6;
+			var orthant3RealMag=1;
+			var orthant3imSign=0;
+			var orthant3imMag=0;
+			
+			var orthant4RealSign=0;
+			var orthant4RealMag=0;
+			var orthant4imSign=6;
+			var orthant4imMag=1;
+		} else if ((realOrthantSign == 0 && imOrthantSign == 0)||(realOrthantSign == 4 && imOrthantSign == 8)){
+			var orthant2RealSign=0;
+			var orthant2RealMag=0;
+			var orthant2imSign=4;
+			var orthant2imMag=1;
+			
+			var orthant3RealSign=6;
+			var orthant3RealMag=1;
+			var orthant3imSign=0;
+			var orthant3imMag=0;
+			
+			var orthant4RealSign=0;
+			var orthant4RealMag=0;
+			var orthant4imSign=10;
+			var orthant4imMag=1;
+		} else {
+			var orthant2RealSign=0;
+			var orthant2RealMag=0;
+			var orthant2imSign=2;
+			var orthant2imMag=1;
+			
+			var orthant3RealSign=6;
+			var orthant3RealMag=1;
+			var orthant3imSign=0;
+			var orthant3imMag=0;
+			
+			var orthant4RealSign=0;
+			var orthant4RealMag=0;
+			var orthant4imSign=8;
+			var orthant4imMag=1;
+		}
+}
+
+
+
+	const orthant2=cHexMultiply(realOrthantSign,1,imOrthantSign,1,orthant2RealSign,orthant2RealMag,orthant2imSign,orthant2imMag);
+		const orthant3=cHexMultiply(realOrthantSign,1,imOrthantSign,1,orthant3RealSign,orthant3RealMag,orthant3imSign,orthant3imMag);
+			const orthant4=cHexMultiply(realOrthantSign,1,imOrthantSign,1,orthant4RealSign,orthant4RealMag,orthant4imSign,orthant4imMag);
+
+
+escapeCount2.push(Tricorn(orthant2[0],realMag,orthant2[2],imMag,exponent,maxIterations));
+escapeCount3.push(Tricorn(orthant3[0],realMag,orthant3[2],imMag,exponent,maxIterations));
+escapeCount4.push(Tricorn(orthant4[0],realMag,orthant4[2],imMag,exponent,maxIterations));
+
+
+}
+
+	if (whichFractal==5){
+//ie if whichFractal is MandelbrotS
+escapeCount.push(MandelbrotS(realOrthantSign,realMag,imOrthantSign,imMag,exponent,maxIterations));
+
+	if (oneOrthantMode != 1){
+
+
+	const orthant2=cHexMultiply(realOrthantSign,1,imOrthantSign,1,0,0,2,1);
+	const orthant3=cHexMultiply(realOrthantSign,1,imOrthantSign,1,6,1,0,0);
+	const orthant4=cHexMultiply(realOrthantSign,1,imOrthantSign,1,0,0,8,1);
+
+
+escapeCount2.push(MandelbrotS(orthant2[0],realMag,orthant2[2],imMag,exponent,maxIterations));
+escapeCount3.push(MandelbrotS(orthant3[0],realMag,orthant3[2],imMag,exponent,maxIterations));
+escapeCount4.push(MandelbrotS(orthant4[0],realMag,orthant4[2],imMag,exponent,maxIterations));
+}
+
+}
+
+	if (whichFractal==6){
+//ie if whichFractal is TricornS
+escapeCount.push(TricornS(realOrthantSign,realMag,imOrthantSign,imMag,exponent,maxIterations));
+
+	if (oneOrthantMode != 1){
+
+
+	const orthant2=cHexMultiply(realOrthantSign,1,imOrthantSign,1,0,0,2,1);
+	const orthant3=cHexMultiply(realOrthantSign,1,imOrthantSign,1,6,1,0,0);
+	const orthant4=cHexMultiply(realOrthantSign,1,imOrthantSign,1,0,0,8,1);
+
+
+escapeCount2.push(TricornS(orthant2[0],realMag,orthant2[2],imMag,exponent,maxIterations));
+escapeCount3.push(TricornS(orthant3[0],realMag,orthant3[2],imMag,exponent,maxIterations));
+escapeCount4.push(TricornS(orthant4[0],realMag,orthant4[2],imMag,exponent,maxIterations));
+}
+
+}
+
+
+	if (whichFractal==7){
+//ie if whichFractal is TricornS2
+escapeCount.push(TricornS2(realOrthantSign,realMag,imOrthantSign,imMag,exponent,maxIterations));
+
+	if (oneOrthantMode != 1){
+
+
+	const orthant2=cHexMultiply(realOrthantSign,1,imOrthantSign,1,0,0,2,1);
+	const orthant3=cHexMultiply(realOrthantSign,1,imOrthantSign,1,6,1,0,0);
+	const orthant4=cHexMultiply(realOrthantSign,1,imOrthantSign,1,0,0,8,1);
+
+
+escapeCount2.push(TricornS2(orthant2[0],realMag,orthant2[2],imMag,exponent,maxIterations));
+escapeCount3.push(TricornS2(orthant3[0],realMag,orthant3[2],imMag,exponent,maxIterations));
+escapeCount4.push(TricornS2(orthant4[0],realMag,orthant4[2],imMag,exponent,maxIterations));
+}
+
+}
+
+
+
+
+
+//end Fractal computation/push escape values to array HERE!!!  	
+
+
+}
+}
+
+
+//console.log(realParts.toString());
+
+//console.log(imParts.toString());
+
+
+//i'm sure there is a more efficient way to do this, but I haven't refactored yet. [[There are other modes for visualization that are more accessibility-oriented as of 2024-12-04]]There are eight colors (including white) and black; black is reserved for non-escaping c values and the remainder rotate such that if it takes 7 iterations to escape, the point will be red...and if it takes 15 iterations, that point will be red...so you should tend to see bands of contrasting colors to indicate iteration contours.
+</script>
+
+<canvas id="myCanvas" width="800" height="800" style="border:1px solid grey"></canvas>
+<a id="download" download="cHex Fractal .jpg" href="" onclick="download_img(this);">Download to cHex Fractal.jpg</a>
+
+</script>
+
+<script>
+
+
+
+
+
+
+
+
+const canvas = document.getElementById("myCanvas");
+const ctx = canvas.getContext("2d");
+ctx.imageSmoothingEnabled = true;
+ctx.imageSmoothingQuality = "high";
+canvas.height = canvas.width;
+ctx.transform(1, 0, 0, -1, 0, canvas.height)
+
+download_img = function(el) {
+  // get image URI from canvas object
+  var imageURI = canvas.toDataURL("image/realOrthantSign imOrthantSign");
+  el.href = imageURI;
+};
+
+
+
+//BEGIN QUADRANT ONE
+
+
+ctx.fillStyle = "black";
+const xArray2=[];
+const yArray2=[];
+for (let i = 0; i < escapeCount.length-1; i++) {
+
+	if (escapeCount[i]==maxIterations){
+		let x=(2*outputBoxSize)+(-1*(Math.floor(i/outputBoxSize+1))%(outputBoxSize+1));
+		let y=outputBoxSize-(i%outputBoxSize);
+		xArray2.push(x);
+		yArray2.push(y);
+}
+
+}
+//console.log(yArray2.toString());
+
+const imgData = ctx.createImageData(2*outputBoxSize, 2*outputBoxSize);
+
+
+	for (let i = 0; i < xArray2.length-1; i++){
+
+		imgData.data[0+((xArray2[i]*4)+((yArray2[i])*8*outputBoxSize))] = 0;
+		imgData.data[1+((xArray2[i]*4)+((yArray2[i])*8*outputBoxSize))] = 0;
+		imgData.data[2+((xArray2[i]*4)+((yArray2[i])*8*outputBoxSize))] = 0;
+		imgData.data[3+((xArray2[i]*4)+((yArray2[i])*8*outputBoxSize))] = 255;
+
+
+}
+
+if (colorMode==0){
+
+ctx.fillStyle = "red";
+const xArray3=[];
+const yArray3=[];
+for (let i = 0; i < escapeCount.length-1; i++) {
+
+	if (escapeCount[i] != maxIterations && escapeCount[i]%8==7){
+		let x=(2*outputBoxSize)+(-1*(Math.floor(i/outputBoxSize+1))%(outputBoxSize+1));
+		let y=outputBoxSize-(i%outputBoxSize);
+		xArray3.push(x);
+		yArray3.push(y);
+}
+
+}
+
+
+	for (let i = 0; i < xArray3.length-1; i++){
+
+		imgData.data[0+((xArray3[i]*4)+((yArray3[i])*8*outputBoxSize))] = 255;
+		imgData.data[1+((xArray3[i]*4)+((yArray3[i])*8*outputBoxSize))] = 0;
+		imgData.data[2+((xArray3[i]*4)+((yArray3[i])*8*outputBoxSize))] = 0;
+		imgData.data[3+((xArray3[i]*4)+((yArray3[i])*8*outputBoxSize))] = 255;
+
+
+}
+
+
+
+
+
+ctx.fillStyle = "green";
+const xArray4=[];
+const yArray4=[];
+for (let i = 0; i < escapeCount.length-1; i++) {
+
+	if (escapeCount[i] != maxIterations && escapeCount[i]%8==6){
+		let x=(2*outputBoxSize)+(-1*(Math.floor(i/outputBoxSize+1))%(outputBoxSize+1));
+		let y=outputBoxSize-(i%outputBoxSize);
+		xArray4.push(x);
+		yArray4.push(y);
+}
+
+}
+
+	for (let i = 0; i < xArray4.length-1; i++){
+
+		imgData.data[0+((xArray4[i]*4)+((yArray4[i])*8*outputBoxSize))] = 0;
+		imgData.data[1+((xArray4[i]*4)+((yArray4[i])*8*outputBoxSize))] = 128;
+		imgData.data[2+((xArray4[i]*4)+((yArray4[i])*8*outputBoxSize))] = 0;
+		imgData.data[3+((xArray4[i]*4)+((yArray4[i])*8*outputBoxSize))] = 255;
+
+
+}
+
+ctx.fillStyle = "purple";
+const xArray5=[];
+const yArray5=[];
+for (let i = 0; i < escapeCount.length-1; i++) {
+
+	if (escapeCount[i] != maxIterations && escapeCount[i]%8==5){
+		let x=(2*outputBoxSize)+(-1*(Math.floor(i/outputBoxSize+1))%(outputBoxSize+1));
+		let y=outputBoxSize-(i%outputBoxSize);
+		xArray5.push(x);
+		yArray5.push(y);
+}
+}
+
+	for (let i = 0; i < xArray5.length-1; i++){
+
+		imgData.data[0+((xArray5[i]*4)+((yArray5[i])*8*outputBoxSize))] = 128;
+		imgData.data[1+((xArray5[i]*4)+((yArray5[i])*8*outputBoxSize))] = 0;
+		imgData.data[2+((xArray5[i]*4)+((yArray5[i])*8*outputBoxSize))] = 128;
+		imgData.data[3+((xArray5[i]*4)+((yArray5[i])*8*outputBoxSize))] = 255;
+
+
+}
+
+
+ctx.fillStyle = "yellow";
+const xArray6=[];
+const yArray6=[];
+for (let i = 0; i < escapeCount.length-1; i++) {
+
+	if (escapeCount[i] != maxIterations && escapeCount[i]%8==4){
+		let x=(2*outputBoxSize)+(-1*(Math.floor(i/outputBoxSize+1))%(outputBoxSize+1));
+		let y=outputBoxSize-(i%outputBoxSize);
+		xArray6.push(x);
+		yArray6.push(y);
+}
+
+}
+
+	for (let i = 0; i < xArray6.length-1; i++){
+
+		imgData.data[0+((xArray6[i]*4)+((yArray6[i])*8*outputBoxSize))] = 255;
+		imgData.data[1+((xArray6[i]*4)+((yArray6[i])*8*outputBoxSize))] = 255;
+		imgData.data[2+((xArray6[i]*4)+((yArray6[i])*8*outputBoxSize))] = 0;
+		imgData.data[3+((xArray6[i]*4)+((yArray6[i])*8*outputBoxSize))] = 255;
+
+
+}
+
+
+
+
+ctx.fillStyle = "blue";
+const xArray7=[];
+const yArray7=[];
+for (let i = 0; i < escapeCount.length-1; i++) {
+
+	if (escapeCount[i] != maxIterations && escapeCount[i]%8==3){
+		let x=(2*outputBoxSize)+(-1*(Math.floor(i/outputBoxSize+1))%(outputBoxSize+1));
+		let y=outputBoxSize-(i%outputBoxSize);
+		xArray7.push(x);
+		yArray7.push(y);
+}
+
+}
+
+	for (let i = 0; i < xArray7.length-1; i++){
+
+		imgData.data[0+((xArray7[i]*4)+((yArray7[i])*8*outputBoxSize))] = 0;
+		imgData.data[1+((xArray7[i]*4)+((yArray7[i])*8*outputBoxSize))] = 0;
+		imgData.data[2+((xArray7[i]*4)+((yArray7[i])*8*outputBoxSize))] = 255;
+		imgData.data[3+((xArray7[i]*4)+((yArray7[i])*8*outputBoxSize))] = 255;
+
+
+}
+
+ctx.fillStyle = "orange";
+const xArray8=[];
+const yArray8=[];
+for (let i = 0; i < escapeCount.length-1; i++) {
+
+	if (escapeCount[i] != maxIterations && escapeCount[i]%8==2){
+		let x=(2*outputBoxSize)+(-1*(Math.floor(i/outputBoxSize+1))%(outputBoxSize+1));
+		let y=outputBoxSize-(i%outputBoxSize);
+		xArray8.push(x);
+		yArray8.push(y);
+}
+
+}
+
+	for (let i = 0; i < xArray8.length-1; i++){
+
+		imgData.data[0+((xArray8[i]*4)+((yArray8[i])*8*outputBoxSize))] = 255;
+		imgData.data[1+((xArray8[i]*4)+((yArray8[i])*8*outputBoxSize))] = 165;
+		imgData.data[2+((xArray8[i]*4)+((yArray8[i])*8*outputBoxSize))] = 0;
+		imgData.data[3+((xArray8[i]*4)+((yArray8[i])*8*outputBoxSize))] = 255;
+
+
+}
+
+ctx.fillStyle = "cyan";
+const xArray9=[];
+const yArray9=[];
+for (let i = 0; i < escapeCount.length-1; i++) {
+
+	if (escapeCount[i] != maxIterations && escapeCount[i]%8==1){
+		let x=(2*outputBoxSize)+(-1*(Math.floor(i/outputBoxSize+1))%(outputBoxSize+1));
+		let y=outputBoxSize-(i%outputBoxSize);
+		xArray9.push(x);
+		yArray9.push(y);
+}
+
+}
+
+	for (let i = 0; i < xArray9.length-1; i++){
+
+		imgData.data[0+((xArray9[i]*4)+((yArray9[i])*8*outputBoxSize))] = 0;
+		imgData.data[1+((xArray9[i]*4)+((yArray9[i])*8*outputBoxSize))] = 255;
+		imgData.data[2+((xArray9[i]*4)+((yArray9[i])*8*outputBoxSize))] = 255;
+		imgData.data[3+((xArray9[i]*4)+((yArray9[i])*8*outputBoxSize))] = 255;
+
+
+}
+
+ctx.fillStyle = "white";
+const xArray10=[];
+const yArray10=[];
+for (let i = 0; i < escapeCount.length-1; i++) {
+
+	if ((escapeCount[i] != maxIterations && escapeCount[i]%8==0) && escapeCount[i] != 0){
+		let x=(2*outputBoxSize)+(-1*(Math.floor(i/outputBoxSize+1))%(outputBoxSize+1));
+		let y=outputBoxSize-(i%outputBoxSize);
+		xArray10.push(x);
+		yArray10.push(y);
+}
+
+}
+
+	for (let i = 0; i < xArray10.length-1; i++){
+
+		imgData.data[0+((xArray10[i]*4)+((yArray10[i])*8*outputBoxSize))] = 255;
+		imgData.data[1+((xArray10[i]*4)+((yArray10[i])*8*outputBoxSize))] = 255;
+		imgData.data[2+((xArray10[i]*4)+((yArray10[i])*8*outputBoxSize))] = 255;
+		imgData.data[3+((xArray10[i]*4)+((yArray10[i])*8*outputBoxSize))] = 255;
+
+
+}
+}
+ctx.putImageData(imgData, 0, 0);
+
+
+
+
+//END QUADRANT ONE
+
+	if (oneOrthantMode != 1){
+
+//BEGIN QUADRANT TWO
+
+ctx.fillStyle = "black";
+const xArray22=[];
+const yArray22=[];
+for (let i = 0; i < escapeCount2.length-1; i++) {
+
+	if (escapeCount2[i]==maxIterations){
+		let x=(Math.floor(i/outputBoxSize+1))%(outputBoxSize+1);
+		let y=outputBoxSize-(i%outputBoxSize);
+		xArray22.push(x);
+		yArray22.push(y);
+}
+
+}
+
+
+	for (let i = 0; i < xArray22.length-1; i++){
+
+		imgData.data[0+((xArray22[i]*4)+((yArray22[i])*8*outputBoxSize))] = 0;
+		imgData.data[1+((xArray22[i]*4)+((yArray22[i])*8*outputBoxSize))] = 0;
+		imgData.data[2+((xArray22[i]*4)+((yArray22[i])*8*outputBoxSize))] = 0;
+		imgData.data[3+((xArray22[i]*4)+((yArray22[i])*8*outputBoxSize))] = 255;
+
+
+}
+
+
+	if (colorMode==0){
+ctx.fillStyle = "red";
+const xArray32=[];
+const yArray32=[];
+for (let i = 0; i < escapeCount2.length-1; i++) {
+
+	if (escapeCount2[i] != maxIterations && escapeCount2[i]%8==7){
+		let x=(Math.floor(i/outputBoxSize+1))%(outputBoxSize+1);
+		let y=outputBoxSize-(i%outputBoxSize);
+		xArray32.push(x);
+		yArray32.push(y);
+}
+
+}
+
+	for (let i = 0; i < xArray32.length-1; i++){
+
+		imgData.data[0+((xArray32[i]*4)+((yArray32[i])*8*outputBoxSize))] = 255;
+		imgData.data[1+((xArray32[i]*4)+((yArray32[i])*8*outputBoxSize))] = 0;
+		imgData.data[2+((xArray32[i]*4)+((yArray32[i])*8*outputBoxSize))] = 0;
+		imgData.data[3+((xArray32[i]*4)+((yArray32[i])*8*outputBoxSize))] = 255;
+
+
+}
+
+
+ctx.fillStyle = "green";
+const xArray42=[];
+const yArray42=[];
+for (let i = 0; i < escapeCount2.length-1; i++) {
+
+	if (escapeCount2[i] != maxIterations && escapeCount2[i]%8==6){
+		let x=(Math.floor(i/outputBoxSize+1))%(outputBoxSize+1);
+		let y=outputBoxSize-(i%outputBoxSize);
+		xArray42.push(x);
+		yArray42.push(y);
+}
+
+}
+
+
+	for (let i = 0; i < xArray42.length-1; i++){
+
+		imgData.data[0+((xArray42[i]*4)+((yArray42[i])*8*outputBoxSize))] = 0;
+		imgData.data[1+((xArray42[i]*4)+((yArray42[i])*8*outputBoxSize))] = 128;
+		imgData.data[2+((xArray42[i]*4)+((yArray42[i])*8*outputBoxSize))] = 0;
+		imgData.data[3+((xArray42[i]*4)+((yArray42[i])*8*outputBoxSize))] = 255;
+
+
+}
+
+ctx.fillStyle = "purple";
+const xArray52=[];
+const yArray52=[];
+for (let i = 0; i < escapeCount2.length-1; i++) {
+
+	if (escapeCount2[i] != maxIterations && escapeCount2[i]%8==5){
+		let x=(Math.floor(i/outputBoxSize+1))%(outputBoxSize+1);
+		let y=outputBoxSize-(i%outputBoxSize);
+		xArray52.push(x);
+		yArray52.push(y);
+}
+
+}
+
+
+	for (let i = 0; i < xArray52.length-1; i++){
+
+		imgData.data[0+((xArray52[i]*4)+((yArray52[i])*8*outputBoxSize))] = 126;
+		imgData.data[1+((xArray52[i]*4)+((yArray52[i])*8*outputBoxSize))] = 0;
+		imgData.data[2+((xArray52[i]*4)+((yArray52[i])*8*outputBoxSize))] = 126;
+		imgData.data[3+((xArray52[i]*4)+((yArray52[i])*8*outputBoxSize))] = 255;
+
+
+}
+
+ctx.fillStyle = "yellow";
+const xArray62=[];
+const yArray62=[];
+for (let i = 0; i < escapeCount2.length-1; i++) {
+
+	if (escapeCount2[i] != maxIterations && escapeCount2[i]%8==4){
+		let x=(Math.floor(i/outputBoxSize+1))%(outputBoxSize+1);
+		let y=outputBoxSize-(i%outputBoxSize);
+		xArray62.push(x);
+		yArray62.push(y);
+}
+
+}
+
+	for (let i = 0; i < xArray62.length-1; i++){
+
+		imgData.data[0+((xArray62[i]*4)+((yArray62[i])*8*outputBoxSize))] = 255;
+		imgData.data[1+((xArray62[i]*4)+((yArray62[i])*8*outputBoxSize))] = 255;
+		imgData.data[2+((xArray62[i]*4)+((yArray62[i])*8*outputBoxSize))] = 0;
+		imgData.data[3+((xArray62[i]*4)+((yArray62[i])*8*outputBoxSize))] = 255;
+
+
+}
+
+
+ctx.fillStyle = "blue";
+const xArray72=[];
+const yArray72=[];
+for (let i = 0; i < escapeCount2.length-1; i++) {
+
+	if (escapeCount2[i] != maxIterations && escapeCount2[i]%8==3){
+		let x=(Math.floor(i/outputBoxSize+1))%(outputBoxSize+1);
+		let y=outputBoxSize-(i%outputBoxSize);
+		xArray72.push(x);
+		yArray72.push(y);
+}
+
+}
+
+
+	for (let i = 0; i < xArray72.length-1; i++){
+
+		imgData.data[0+((xArray72[i]*4)+((yArray72[i])*8*outputBoxSize))] = 0;
+		imgData.data[1+((xArray72[i]*4)+((yArray72[i])*8*outputBoxSize))] = 0;
+		imgData.data[2+((xArray72[i]*4)+((yArray72[i])*8*outputBoxSize))] = 255;
+		imgData.data[3+((xArray72[i]*4)+((yArray72[i])*8*outputBoxSize))] = 255;
+
+
+}
+
+
+ctx.fillStyle = "orange";
+const xArray82=[];
+const yArray82=[];
+for (let i = 0; i < escapeCount2.length-1; i++) {
+
+	if (escapeCount2[i] != maxIterations && escapeCount2[i]%8==2){
+		let x=(Math.floor(i/outputBoxSize+1))%(outputBoxSize+1);
+		let y=outputBoxSize-(i%outputBoxSize);
+		xArray82.push(x);
+		yArray82.push(y);
+}
+
+}
+
+
+	for (let i = 0; i < xArray82.length-1; i++){
+
+		imgData.data[0+((xArray82[i]*4)+((yArray82[i])*8*outputBoxSize))] = 255;
+		imgData.data[1+((xArray82[i]*4)+((yArray82[i])*8*outputBoxSize))] = 165;
+		imgData.data[2+((xArray82[i]*4)+((yArray82[i])*8*outputBoxSize))] = 0;
+		imgData.data[3+((xArray82[i]*4)+((yArray82[i])*8*outputBoxSize))] = 255;
+
+
+}
+
+
+ctx.fillStyle = "cyan";
+const xArray92=[];
+const yArray92=[];
+for (let i = 0; i < escapeCount2.length-1; i++) {
+
+	if (escapeCount2[i] != maxIterations && escapeCount2[i]%8==1){
+		let x=(Math.floor(i/outputBoxSize+1))%(outputBoxSize+1);
+		let y=outputBoxSize-(i%outputBoxSize);
+		xArray92.push(x);
+		yArray92.push(y);
+}
+
+}
+
+
+	for (let i = 0; i < xArray92.length-1; i++){
+
+		imgData.data[0+((xArray92[i]*4)+((yArray92[i])*8*outputBoxSize))] = 0;
+		imgData.data[1+((xArray92[i]*4)+((yArray92[i])*8*outputBoxSize))] = 255;
+		imgData.data[2+((xArray92[i]*4)+((yArray92[i])*8*outputBoxSize))] = 255;
+		imgData.data[3+((xArray92[i]*4)+((yArray92[i])*8*outputBoxSize))] = 255;
+
+
+}
+
+ctx.fillStyle = "white";
+const xArray102=[];
+const yArray102=[];
+for (let i = 0; i < escapeCount2.length-1; i++) {
+
+	if ((escapeCount2[i] != maxIterations && escapeCount2[i]%8==0) && escapeCount2[i] != 0){
+		let x=(Math.floor(i/outputBoxSize+1))%(outputBoxSize+1);
+		let y=outputBoxSize-(i%outputBoxSize);
+		xArray102.push(x);
+		yArray102.push(y);
+}
+
+}
+
+
+	for (let i = 0; i < xArray102.length-1; i++){
+
+		imgData.data[0+((xArray102[i]*4)+((yArray102[i])*8*outputBoxSize))] = 255;
+		imgData.data[1+((xArray102[i]*4)+((yArray102[i])*8*outputBoxSize))] = 255;
+		imgData.data[2+((xArray102[i]*4)+((yArray102[i])*8*outputBoxSize))] = 255;
+		imgData.data[3+((xArray102[i]*4)+((yArray102[i])*8*outputBoxSize))] = 255;
+
+
+}
+}
+//END QUADRANT TWO
+
+
+//BEGIN QUADRANT THREE
+
+ctx.fillStyle = "black";
+const xArray23=[];
+const yArray23=[];
+for (let i = 0; i < escapeCount3.length-1; i++) {
+
+	if (escapeCount3[i]==maxIterations){
+		let x=(Math.floor(i/outputBoxSize+1))%(outputBoxSize+1);
+		let y=outputBoxSize+(i%outputBoxSize);
+		xArray23.push(x);
+		yArray23.push(y);
+}
+
+}
+
+	for (let i = 0; i < xArray23.length-1; i++){
+
+		imgData.data[0+((xArray23[i]*4)+((yArray23[i])*8*outputBoxSize))] = 0;
+		imgData.data[1+((xArray23[i]*4)+((yArray23[i])*8*outputBoxSize))] = 0;
+		imgData.data[2+((xArray23[i]*4)+((yArray23[i])*8*outputBoxSize))] = 0;
+		imgData.data[3+((xArray23[i]*4)+((yArray23[i])*8*outputBoxSize))] = 255;
+
+
+}
+
+	if (colorMode==0){
+
+ctx.fillStyle = "red";
+const xArray33=[];
+const yArray33=[];
+for (let i = 0; i < escapeCount3.length-1; i++) {
+
+	if (escapeCount3[i] != maxIterations && escapeCount3[i]%8==7){
+		let x=(Math.floor(i/outputBoxSize+1))%(outputBoxSize+1);
+		let y=outputBoxSize+((i%outputBoxSize));
+		xArray33.push(x);
+		yArray33.push(y);
+}
+
+}
+
+
+	for (let i = 0; i < xArray33.length-1; i++){
+
+		imgData.data[0+((xArray33[i]*4)+((yArray33[i])*8*outputBoxSize))] = 255;
+		imgData.data[1+((xArray33[i]*4)+((yArray33[i])*8*outputBoxSize))] = 0;
+		imgData.data[2+((xArray33[i]*4)+((yArray33[i])*8*outputBoxSize))] = 0;
+		imgData.data[3+((xArray33[i]*4)+((yArray33[i])*8*outputBoxSize))] = 255;
+
+
+}
+
+
+ctx.fillStyle = "green";
+const xArray43=[];
+const yArray43=[];
+for (let i = 0; i < escapeCount3.length-1; i++) {
+
+	if (escapeCount3[i] != maxIterations && escapeCount3[i]%8==6){
+		let x=(Math.floor(i/outputBoxSize+1))%(outputBoxSize+1);
+		let y=outputBoxSize+((i%outputBoxSize));
+		xArray43.push(x);
+		yArray43.push(y);
+}
+
+}
+
+	for (let i = 0; i < xArray43.length-1; i++){
+
+		imgData.data[0+((xArray43[i]*4)+((yArray43[i])*8*outputBoxSize))] = 0;
+		imgData.data[1+((xArray43[i]*4)+((yArray43[i])*8*outputBoxSize))] = 128;
+		imgData.data[2+((xArray43[i]*4)+((yArray43[i])*8*outputBoxSize))] = 0;
+		imgData.data[3+((xArray43[i]*4)+((yArray43[i])*8*outputBoxSize))] = 255;
+
+
+}
+
+ctx.fillStyle = "purple";
+const xArray53=[];
+const yArray53=[];
+for (let i = 0; i < escapeCount3.length-1; i++) {
+
+	if (escapeCount3[i] != maxIterations && escapeCount3[i]%8==5){
+		let x=(Math.floor(i/outputBoxSize+1))%(outputBoxSize+1);
+		let y=outputBoxSize+((i%outputBoxSize));
+		xArray53.push(x);
+		yArray53.push(y);
+}
+
+}
+
+
+	for (let i = 0; i < xArray53.length-1; i++){
+
+		imgData.data[0+((xArray53[i]*4)+((yArray53[i])*8*outputBoxSize))] = 128;
+		imgData.data[1+((xArray53[i]*4)+((yArray53[i])*8*outputBoxSize))] = 0;
+		imgData.data[2+((xArray53[i]*4)+((yArray53[i])*8*outputBoxSize))] = 128;
+		imgData.data[3+((xArray53[i]*4)+((yArray53[i])*8*outputBoxSize))] = 255;
+
+
+}
+
+ctx.fillStyle = "yellow";
+const xArray63=[];
+const yArray63=[];
+for (let i = 0; i < escapeCount3.length-1; i++) {
+
+	if (escapeCount3[i] != maxIterations && escapeCount3[i]%8==4){
+		let x=(Math.floor(i/outputBoxSize+1))%(outputBoxSize+1);
+		let y=outputBoxSize+((i%outputBoxSize));
+		xArray63.push(x);
+		yArray63.push(y);
+}
+
+}
+
+	for (let i = 0; i < xArray63.length-1; i++){
+
+		imgData.data[0+((xArray63[i]*4)+((yArray63[i])*8*outputBoxSize))] = 255;
+		imgData.data[1+((xArray63[i]*4)+((yArray63[i])*8*outputBoxSize))] = 255;
+		imgData.data[2+((xArray63[i]*4)+((yArray63[i])*8*outputBoxSize))] = 0;
+		imgData.data[3+((xArray63[i]*4)+((yArray63[i])*8*outputBoxSize))] = 255;
+
+
+}
+
+
+ctx.fillStyle = "blue";
+const xArray73=[];
+const yArray73=[];
+for (let i = 0; i < escapeCount3.length-1; i++) {
+
+	if (escapeCount3[i] != maxIterations && escapeCount3[i]%8==3){
+		let x=(Math.floor(i/outputBoxSize+1))%(outputBoxSize+1);
+		let y=outputBoxSize+((i%outputBoxSize));
+		xArray73.push(x);
+		yArray73.push(y);
+}
+
+}
+
+	for (let i = 0; i < xArray73.length-1; i++){
+
+		imgData.data[0+((xArray73[i]*4)+((yArray73[i])*8*outputBoxSize))] = 0;
+		imgData.data[1+((xArray73[i]*4)+((yArray73[i])*8*outputBoxSize))] = 0;
+		imgData.data[2+((xArray73[i]*4)+((yArray73[i])*8*outputBoxSize))] = 255;
+		imgData.data[3+((xArray73[i]*4)+((yArray73[i])*8*outputBoxSize))] = 255;
+
+
+}
+
+
+ctx.fillStyle = "orange";
+const xArray83=[];
+const yArray83=[];
+for (let i = 0; i < escapeCount3.length-1; i++) {
+
+	if (escapeCount3[i] != maxIterations && escapeCount3[i]%8==2){
+		let x=(Math.floor(i/outputBoxSize+1))%(outputBoxSize+1);
+		let y=outputBoxSize+((i%outputBoxSize));
+		xArray83.push(x);
+		yArray83.push(y);
+}
+
+}
+
+	for (let i = 0; i < xArray83.length-1; i++){
+
+		imgData.data[0+((xArray83[i]*4)+((yArray83[i])*8*outputBoxSize))] = 255;
+		imgData.data[1+((xArray83[i]*4)+((yArray83[i])*8*outputBoxSize))] = 165;
+		imgData.data[2+((xArray83[i]*4)+((yArray83[i])*8*outputBoxSize))] = 0;
+		imgData.data[3+((xArray83[i]*4)+((yArray83[i])*8*outputBoxSize))] = 255;
+
+
+}
+
+
+ctx.fillStyle = "cyan";
+const xArray93=[];
+const yArray93=[];
+for (let i = 0; i < escapeCount3.length-1; i++) {
+
+	if (escapeCount3[i] != maxIterations && escapeCount3[i]%8==1){
+		let x=(Math.floor(i/outputBoxSize+1))%(outputBoxSize+1);
+		let y=outputBoxSize+((i%outputBoxSize));
+		xArray93.push(x);
+		yArray93.push(y);
+}
+
+}
+
+
+	for (let i = 0; i < xArray93.length-1; i++){
+
+		imgData.data[0+((xArray93[i]*4)+((yArray93[i])*8*outputBoxSize))] = 0;
+		imgData.data[1+((xArray93[i]*4)+((yArray93[i])*8*outputBoxSize))] = 255;
+		imgData.data[2+((xArray93[i]*4)+((yArray93[i])*8*outputBoxSize))] = 255;
+		imgData.data[3+((xArray93[i]*4)+((yArray93[i])*8*outputBoxSize))] = 255;
+
+
+}
+
+
+ctx.fillStyle = "white";
+const xArray103=[];
+const yArray103=[];
+for (let i = 0; i < escapeCount3.length-1; i++) {
+
+	if ((escapeCount3[i] != maxIterations && escapeCount3[i]%8==0) && escapeCount3[i] != 0){
+		let x=(Math.floor(i/outputBoxSize+1))%(outputBoxSize+1);
+		let y=outputBoxSize+((i%outputBoxSize));
+		xArray103.push(x);
+		yArray103.push(y);
+}
+
+}
+
+
+	for (let i = 0; i < xArray103.length-1; i++){
+
+		imgData.data[0+((xArray103[i]*4)+((yArray103[i])*8*outputBoxSize))] = 255;
+		imgData.data[1+((xArray103[i]*4)+((yArray103[i])*8*outputBoxSize))] = 255;
+		imgData.data[2+((xArray103[i]*4)+((yArray103[i])*8*outputBoxSize))] = 255;
+		imgData.data[3+((xArray103[i]*4)+((yArray103[i])*8*outputBoxSize))] = 255;
+
+
+}
+
+}
+
+//END QUADRANT THREE
+
+//BEGIN QUADRANT FOUR
+
+ctx.fillStyle = "black";
+const xArray24=[];
+const yArray24=[];
+for (let i = 0; i < escapeCount4.length-1; i++) {
+
+	if (escapeCount4[i]==maxIterations){
+		let x=(2*outputBoxSize)+(-1*((Math.floor(i/outputBoxSize+1))%(outputBoxSize+1)));
+		let y=outputBoxSize+((i%outputBoxSize));
+		xArray24.push(x);
+		yArray24.push(y);
+}
+
+}
+
+
+	for (let i = 0; i < xArray24.length-1; i++){
+
+		imgData.data[0+((xArray24[i]*4)+((yArray24[i])*8*outputBoxSize))] = 0;
+		imgData.data[1+((xArray24[i]*4)+((yArray24[i])*8*outputBoxSize))] = 0;
+		imgData.data[2+((xArray24[i]*4)+((yArray24[i])*8*outputBoxSize))] = 0;
+		imgData.data[3+((xArray24[i]*4)+((yArray24[i])*8*outputBoxSize))] = 255;
+
+
+}
+
+
+	if (colorMode==0){
+ctx.fillStyle = "red";
+const xArray34=[];
+const yArray34=[];
+for (let i = 0; i < escapeCount4.length-1; i++) {
+
+	if (escapeCount4[i] != maxIterations && escapeCount4[i]%8==7){
+		let x=(2*outputBoxSize)+(-1*((Math.floor(i/outputBoxSize+1))%(outputBoxSize+1)));
+		let y=outputBoxSize+((i%outputBoxSize));
+		xArray34.push(x);
+		yArray34.push(y);
+}
+
+}
+
+	for (let i = 0; i < xArray34.length-1; i++){
+
+		imgData.data[0+((xArray34[i]*4)+((yArray34[i])*8*outputBoxSize))] = 255;
+		imgData.data[1+((xArray34[i]*4)+((yArray34[i])*8*outputBoxSize))] = 0;
+		imgData.data[2+((xArray34[i]*4)+((yArray34[i])*8*outputBoxSize))] = 0;
+		imgData.data[3+((xArray34[i]*4)+((yArray34[i])*8*outputBoxSize))] = 255;
+
+
+}
+
+
+ctx.fillStyle = "green";
+const xArray44=[];
+const yArray44=[];
+for (let i = 0; i < escapeCount4.length-1; i++) {
+
+	if (escapeCount4[i] != maxIterations && escapeCount4[i]%8==6){
+		let x=(2*outputBoxSize)+(-1*((Math.floor(i/outputBoxSize+1))%(outputBoxSize+1)));
+		let y=outputBoxSize+((i%outputBoxSize));
+		xArray44.push(x);
+		yArray44.push(y);
+}
+
+}
+
+	for (let i = 0; i < xArray44.length-1; i++){
+
+		imgData.data[0+((xArray44[i]*4)+((yArray44[i])*8*outputBoxSize))] = 0;
+		imgData.data[1+((xArray44[i]*4)+((yArray44[i])*8*outputBoxSize))] = 128;
+		imgData.data[2+((xArray44[i]*4)+((yArray44[i])*8*outputBoxSize))] = 0;
+		imgData.data[3+((xArray44[i]*4)+((yArray44[i])*8*outputBoxSize))] = 255;
+
+
+}
+
+ctx.fillStyle = "purple";
+const xArray54=[];
+const yArray54=[];
+for (let i = 0; i < escapeCount4.length-1; i++) {
+
+	if (escapeCount4[i] != maxIterations && escapeCount4[i]%8==5){
+		let x=(2*outputBoxSize)+(-1*((Math.floor(i/outputBoxSize+1))%(outputBoxSize+1)));
+		let y=outputBoxSize+((i%outputBoxSize));
+		xArray54.push(x);
+		yArray54.push(y);
+}
+
+}
+
+
+	for (let i = 0; i < xArray54.length-1; i++){
+
+		imgData.data[0+((xArray54[i]*4)+((yArray54[i])*8*outputBoxSize))] = 128;
+		imgData.data[1+((xArray54[i]*4)+((yArray54[i])*8*outputBoxSize))] = 0;
+		imgData.data[2+((xArray54[i]*4)+((yArray54[i])*8*outputBoxSize))] = 128;
+		imgData.data[3+((xArray54[i]*4)+((yArray54[i])*8*outputBoxSize))] = 255;
+
+
+}
+
+ctx.fillStyle = "yellow";
+const xArray64=[];
+const yArray64=[];
+for (let i = 0; i < escapeCount4.length-1; i++) {
+
+	if (escapeCount4[i] != maxIterations && escapeCount4[i]%8==4){
+		let x=(2*outputBoxSize)+(-1*((Math.floor(i/outputBoxSize+1))%(outputBoxSize+1)));
+		let y=outputBoxSize+((i%outputBoxSize));
+		xArray64.push(x);
+		yArray64.push(y);
+}
+
+}
+
+	for (let i = 0; i < xArray64.length-1; i++){
+
+		imgData.data[0+((xArray64[i]*4)+((yArray64[i])*8*outputBoxSize))] = 255;
+		imgData.data[1+((xArray64[i]*4)+((yArray64[i])*8*outputBoxSize))] = 255;
+		imgData.data[2+((xArray64[i]*4)+((yArray64[i])*8*outputBoxSize))] = 0;
+		imgData.data[3+((xArray64[i]*4)+((yArray64[i])*8*outputBoxSize))] = 255;
+
+
+}
+
+
+ctx.fillStyle = "blue";
+const xArray74=[];
+const yArray74=[];
+for (let i = 0; i < escapeCount4.length-1; i++) {
+
+	if (escapeCount4[i] != maxIterations && escapeCount4[i]%8==3){
+		let x=(2*outputBoxSize)+(-1*((Math.floor(i/outputBoxSize+1))%(outputBoxSize+1)));
+		let y=outputBoxSize+((i%outputBoxSize));
+		xArray74.push(x);
+		yArray74.push(y);
+}
+
+}
+
+	for (let i = 0; i < xArray74.length-1; i++){
+
+		imgData.data[0+((xArray74[i]*4)+((yArray74[i])*8*outputBoxSize))] = 0;
+		imgData.data[1+((xArray74[i]*4)+((yArray74[i])*8*outputBoxSize))] = 0;
+		imgData.data[2+((xArray74[i]*4)+((yArray74[i])*8*outputBoxSize))] = 255;
+		imgData.data[3+((xArray74[i]*4)+((yArray74[i])*8*outputBoxSize))] = 255;
+
+
+}
+
+
+ctx.fillStyle = "orange";
+const xArray84=[];
+const yArray84=[];
+for (let i = 0; i < escapeCount4.length-1; i++) {
+
+	if (escapeCount4[i] != maxIterations && escapeCount4[i]%8==2){
+		let x=(2*outputBoxSize)+(-1*((Math.floor(i/outputBoxSize+1))%(outputBoxSize+1)));
+		let y=outputBoxSize+((i%outputBoxSize));
+		xArray84.push(x);
+		yArray84.push(y);
+}
+
+}
+
+
+	for (let i = 0; i < xArray84.length-1; i++){
+
+		imgData.data[0+((xArray84[i]*4)+((yArray84[i])*8*outputBoxSize))] = 255;
+		imgData.data[1+((xArray84[i]*4)+((yArray84[i])*8*outputBoxSize))] = 165;
+		imgData.data[2+((xArray84[i]*4)+((yArray84[i])*8*outputBoxSize))] = 0;
+		imgData.data[3+((xArray84[i]*4)+((yArray84[i])*8*outputBoxSize))] = 255;
+
+
+}
+
+
+ctx.fillStyle = "cyan";
+const xArray94=[];
+const yArray94=[];
+for (let i = 0; i < escapeCount4.length-1; i++) {
+
+	if (escapeCount4[i] != maxIterations && escapeCount4[i]%8==1){
+		let x=(2*outputBoxSize)+(-1*((Math.floor(i/outputBoxSize+1))%(outputBoxSize+1)));
+		let y=outputBoxSize+((i%outputBoxSize));
+		xArray94.push(x);
+		yArray94.push(y);
+}
+
+}
+
+
+	for (let i = 0; i < xArray94.length-1; i++){
+
+		imgData.data[0+((xArray94[i]*4)+((yArray94[i])*8*outputBoxSize))] = 0;
+		imgData.data[1+((xArray94[i]*4)+((yArray94[i])*8*outputBoxSize))] = 255;
+		imgData.data[2+((xArray94[i]*4)+((yArray94[i])*8*outputBoxSize))] = 255;
+		imgData.data[3+((xArray94[i]*4)+((yArray94[i])*8*outputBoxSize))] = 255;
+
+
+}
+
+ctx.fillStyle = "white";
+const xArray104=[];
+const yArray104=[];
+for (let i = 0; i < escapeCount4.length-1; i++) {
+
+	if ((escapeCount4[i] != maxIterations && escapeCount4[i]%8==0) && escapeCount4[i] != 0){
+		let x=(2*outputBoxSize)+(-1*((Math.floor(i/outputBoxSize+1))%(outputBoxSize+1)));
+		let y=outputBoxSize+((i%outputBoxSize));
+		xArray104.push(x);
+		yArray104.push(y);
+}
+
+}
+
+
+	for (let i = 0; i < xArray104.length-1; i++){
+
+		imgData.data[0+((xArray104[i]*4)+((yArray104[i])*8*outputBoxSize))] = 255;
+		imgData.data[1+((xArray104[i]*4)+((yArray104[i])*8*outputBoxSize))] = 255;
+		imgData.data[2+((xArray104[i]*4)+((yArray104[i])*8*outputBoxSize))] = 255;
+		imgData.data[3+((xArray104[i]*4)+((yArray104[i])*8*outputBoxSize))] = 255;
+
+
+}
+}
+}
+//END QUADRANT FOUR
+
+
+	if (colorMode==1){
+
+	const glowXArray=[];
+	const glowYArray=[];
+		const glowXArray2=[];
+	const glowYArray2=[];
+		const glowXArray3=[];
+	const glowYArray3=[];
+		const glowXArray4=[];
+	const glowYArray4=[];
+	for (let i = 0; i < escapeCount.length-1; i++){
+		let escapeIncrement=255/maxIterations;
+
+		let x=(2*outputBoxSize)+(-1*((Math.floor(i/outputBoxSize+1))%(outputBoxSize+1)));
+		let y=outputBoxSize-((i%outputBoxSize));
+		glowXArray.push(x);
+		glowYArray.push(y);
+
+
+		imgData.data[0+((glowXArray[i]*4)+((glowYArray[i])*8*outputBoxSize))] = escapeCount[i]*escapeIncrement;
+		imgData.data[1+((glowXArray[i]*4)+((glowYArray[i])*8*outputBoxSize))] = escapeCount[i]*escapeIncrement;
+		imgData.data[2+((glowXArray[i]*4)+((glowYArray[i])*8*outputBoxSize))] = escapeCount[i]*escapeIncrement;
+		imgData.data[3+((glowXArray[i]*4)+((glowYArray[i])*8*outputBoxSize))] = escapeCount[i]*escapeIncrement;
+
+		let x2=(2*outputBoxSize)+(((Math.floor(i/outputBoxSize+1))%(outputBoxSize+1)));
+		let y2=outputBoxSize-((i%outputBoxSize));
+		glowXArray2.push(x2);
+		glowYArray2.push(y2-1);
+
+
+		imgData.data[0+((glowXArray2[i]*4)+((glowYArray2[i])*8*outputBoxSize))] = escapeCount2[i]*escapeIncrement;
+		imgData.data[1+((glowXArray2[i]*4)+((glowYArray2[i])*8*outputBoxSize))] = escapeCount2[i]*escapeIncrement;
+		imgData.data[2+((glowXArray2[i]*4)+((glowYArray2[i])*8*outputBoxSize))] = escapeCount2[i]*escapeIncrement;
+		imgData.data[3+((glowXArray2[i]*4)+((glowYArray2[i])*8*outputBoxSize))] = escapeCount2[i]*escapeIncrement;
+
+		let x3=(2*outputBoxSize)+(((Math.floor(i/outputBoxSize+1))%(outputBoxSize+1)));
+		let y3=outputBoxSize+((i%outputBoxSize));
+		glowXArray3.push(x3);
+		glowYArray3.push(y3-1);
+
+
+		imgData.data[0+((glowXArray3[i]*4)+((glowYArray3[i])*8*outputBoxSize))] = escapeCount3[i]*escapeIncrement;
+		imgData.data[1+((glowXArray3[i]*4)+((glowYArray3[i])*8*outputBoxSize))] = escapeCount3[i]*escapeIncrement;
+		imgData.data[2+((glowXArray3[i]*4)+((glowYArray3[i])*8*outputBoxSize))] = escapeCount3[i]*escapeIncrement;
+		imgData.data[3+((glowXArray3[i]*4)+((glowYArray3[i])*8*outputBoxSize))] = escapeCount3[i]*escapeIncrement;
+
+
+		let x4=(2*outputBoxSize)+(-1*((Math.floor(i/outputBoxSize+1))%(outputBoxSize+1)));
+		let y4=outputBoxSize+((i%outputBoxSize));
+		glowXArray4.push(x4);
+		glowYArray4.push(y4);
+
+
+		imgData.data[0+((glowXArray4[i]*4)+((glowYArray4[i])*8*outputBoxSize))] = escapeCount4[i]*escapeIncrement;
+		imgData.data[1+((glowXArray4[i]*4)+((glowYArray4[i])*8*outputBoxSize))] = escapeCount4[i]*escapeIncrement;
+		imgData.data[2+((glowXArray4[i]*4)+((glowYArray4[i])*8*outputBoxSize))] = escapeCount4[i]*escapeIncrement;
+		imgData.data[3+((glowXArray4[i]*4)+((glowYArray4[i])*8*outputBoxSize))] = escapeCount4[i]*escapeIncrement;
+
+
+
+}
+}
+
+
+	if (colorMode==2){
+
+	const glowXArray=[];
+	const glowYArray=[];
+		const glowXArray2=[];
+	const glowYArray2=[];
+		const glowXArray3=[];
+	const glowYArray3=[];
+		const glowXArray4=[];
+	const glowYArray4=[];
+	for (let i = 0; i < escapeCount.length-1; i++){
+		let escapeIncrement=255/maxIterations;
+
+		let x=(2*outputBoxSize)+(-1*((Math.floor(i/outputBoxSize+1))%(outputBoxSize+1)));
+		let y=outputBoxSize-((i%outputBoxSize));
+		glowXArray.push(x);
+		glowYArray.push(y);
+		let x2=(2*outputBoxSize)+(((Math.floor(i/outputBoxSize+1))%(outputBoxSize+1)));
+		let y2=outputBoxSize-((i%outputBoxSize));
+		glowXArray2.push(x2);
+		glowYArray2.push(y2-1);
+				let x3=(2*outputBoxSize)+(((Math.floor(i/outputBoxSize+1))%(outputBoxSize+1)));
+		let y3=outputBoxSize+((i%outputBoxSize));
+		glowXArray3.push(x3);
+		glowYArray3.push(y3-1);
+		let x4=(2*outputBoxSize)+(-1*((Math.floor(i/outputBoxSize+1))%(outputBoxSize+1)));
+		let y4=outputBoxSize+((i%outputBoxSize));
+		glowXArray4.push(x4);
+		glowYArray4.push(y4);
+		
+		imgData.data[0+((glowXArray[i]*4)+((glowYArray[i])*8*outputBoxSize))] = (((escapeCount[i]+mode2ModuloOffset)%maxIterations)*escapeIncrement);
+		imgData.data[1+((glowXArray[i]*4)+((glowYArray[i])*8*outputBoxSize))] = (((escapeCount[i]+mode2ModuloOffset)%maxIterations)*escapeIncrement);
+		imgData.data[2+((glowXArray[i]*4)+((glowYArray[i])*8*outputBoxSize))] = (((escapeCount[i]+mode2ModuloOffset)%maxIterations)*escapeIncrement);
+		imgData.data[3+((glowXArray[i]*4)+((glowYArray[i])*8*outputBoxSize))] = 255;
+
+		imgData.data[0+((glowXArray2[i]*4)+((glowYArray2[i])*8*outputBoxSize))] = (((escapeCount2[i]+mode2ModuloOffset)%maxIterations)*escapeIncrement);
+		imgData.data[1+((glowXArray2[i]*4)+((glowYArray2[i])*8*outputBoxSize))] = (((escapeCount2[i]+mode2ModuloOffset)%maxIterations)*escapeIncrement);
+		imgData.data[2+((glowXArray2[i]*4)+((glowYArray2[i])*8*outputBoxSize))] = (((escapeCount2[i]+mode2ModuloOffset)%maxIterations)*escapeIncrement);
+		imgData.data[3+((glowXArray2[i]*4)+((glowYArray2[i])*8*outputBoxSize))] = 255;
+
+		imgData.data[0+((glowXArray3[i]*4)+((glowYArray3[i])*8*outputBoxSize))] = (((escapeCount3[i]+mode2ModuloOffset)%maxIterations)*escapeIncrement);
+		imgData.data[1+((glowXArray3[i]*4)+((glowYArray3[i])*8*outputBoxSize))] = (((escapeCount3[i]+mode2ModuloOffset)%maxIterations)*escapeIncrement);
+		imgData.data[2+((glowXArray3[i]*4)+((glowYArray3[i])*8*outputBoxSize))] = (((escapeCount3[i]+mode2ModuloOffset)%maxIterations)*escapeIncrement);
+		imgData.data[3+((glowXArray3[i]*4)+((glowYArray3[i])*8*outputBoxSize))] = 255;
+
+		imgData.data[0+((glowXArray4[i]*4)+((glowYArray4[i])*8*outputBoxSize))] = (((escapeCount4[i]+mode2ModuloOffset)%maxIterations)*escapeIncrement);
+		imgData.data[1+((glowXArray4[i]*4)+((glowYArray4[i])*8*outputBoxSize))] = (((escapeCount4[i]+mode2ModuloOffset)%maxIterations)*escapeIncrement);
+		imgData.data[2+((glowXArray4[i]*4)+((glowYArray4[i])*8*outputBoxSize))] = (((escapeCount4[i]+mode2ModuloOffset)%maxIterations)*escapeIncrement);
+		imgData.data[3+((glowXArray4[i]*4)+((glowYArray4[i])*8*outputBoxSize))] = 255;
+
+
+
+}
+}
+
+
+//mode 3 emulates viridis with RGB ranges 253-68 (midpoint ~31); 231, 1; 37-84 (midpoint ~140)
+
+
+	if (colorMode==3){
+
+	let iterationMidpoint=Math.round(maxIterations/2);
+
+//highest escapeCount -> 253,231,37
+//midpoint escapeCount -> 31, 145, 140
+//lowest escapeCount -> 68,1,84
+	const glowXArray=[];
+	const glowYArray=[];
+		const glowXArray2=[];
+	const glowYArray2=[];
+		const glowXArray3=[];
+	const glowYArray3=[];
+		const glowXArray4=[];
+	const glowYArray4=[];
+	for (let i = 0; i < escapeCount.length-1; i++){
+		let escapeIncrement=255/maxIterations;
+
+		let x=(2*outputBoxSize)+(-1*((Math.floor(i/outputBoxSize+1))%(outputBoxSize+1)));
+		let y=outputBoxSize-((i%outputBoxSize));
+		glowXArray.push(x);
+		glowYArray.push(y);
+		let x2=(2*outputBoxSize)+(((Math.floor(i/outputBoxSize+1))%(outputBoxSize+1)));
+		let y2=outputBoxSize-((i%outputBoxSize));
+		glowXArray2.push(x2);
+		glowYArray2.push(y2-1);
+				let x3=(2*outputBoxSize)+(((Math.floor(i/outputBoxSize+1))%(outputBoxSize+1)));
+		let y3=outputBoxSize+((i%outputBoxSize));
+		glowXArray3.push(x3);
+		glowYArray3.push(y3-1);
+		let x4=(2*outputBoxSize)+(-1*((Math.floor(i/outputBoxSize+1))%(outputBoxSize+1)));
+		let y4=outputBoxSize+((i%outputBoxSize));
+		glowXArray4.push(x4);
+		glowYArray4.push(y4);
+		
+if (((escapeCount[i]+mode3ModuloOffset)%maxIterations)==iterationMidpoint){ 31, 145, 140
+		imgData.data[0+((glowXArray[i]*4)+((glowYArray[i])*8*outputBoxSize))] = 31;
+		imgData.data[1+((glowXArray[i]*4)+((glowYArray[i])*8*outputBoxSize))] = 145;
+		imgData.data[2+((glowXArray[i]*4)+((glowYArray[i])*8*outputBoxSize))] = 140;
+		imgData.data[3+((glowXArray[i]*4)+((glowYArray[i])*8*outputBoxSize))] = 255;
+
+		imgData.data[0+((glowXArray2[i]*4)+((glowYArray2[i])*8*outputBoxSize))] = 31;
+		imgData.data[1+((glowXArray2[i]*4)+((glowYArray2[i])*8*outputBoxSize))] = 145;
+		imgData.data[2+((glowXArray2[i]*4)+((glowYArray2[i])*8*outputBoxSize))] = 140;
+		imgData.data[3+((glowXArray2[i]*4)+((glowYArray2[i])*8*outputBoxSize))] = 255;
+
+		imgData.data[0+((glowXArray3[i]*4)+((glowYArray3[i])*8*outputBoxSize))] = 31;
+		imgData.data[1+((glowXArray3[i]*4)+((glowYArray3[i])*8*outputBoxSize))] = 145;
+		imgData.data[2+((glowXArray3[i]*4)+((glowYArray3[i])*8*outputBoxSize))] = 140;
+		imgData.data[3+((glowXArray3[i]*4)+((glowYArray3[i])*8*outputBoxSize))] = 255;
+
+		imgData.data[0+((glowXArray4[i]*4)+((glowYArray4[i])*8*outputBoxSize))] = 31;
+		imgData.data[1+((glowXArray4[i]*4)+((glowYArray4[i])*8*outputBoxSize))] = 145;
+		imgData.data[2+((glowXArray4[i]*4)+((glowYArray4[i])*8*outputBoxSize))] = 140;
+		imgData.data[3+((glowXArray4[i]*4)+((glowYArray4[i])*8*outputBoxSize))] = 255;
+} else if (((escapeCount[i]+mode3ModuloOffset)%maxIterations)>iterationMidpoint){ 
+
+//highest escapeCount -> 253,231,37
+//midpoint escapeCount -> 31, 145, 140
+//lowest escapeCount -> 68,1,84
+
+	
+		imgData.data[0+((glowXArray[i]*4)+((glowYArray[i])*8*outputBoxSize))] = ((222/(iterationMidpoint-1))*(((escapeCount[i]+mode3ModuloOffset)%maxIterations)-iterationMidpoint))+31;
+		imgData.data[1+((glowXArray[i]*4)+((glowYArray[i])*8*outputBoxSize))] = ((86/(iterationMidpoint-1))*(((escapeCount[i]+mode3ModuloOffset)%maxIterations)-iterationMidpoint))+145;
+		imgData.data[2+((glowXArray[i]*4)+((glowYArray[i])*8*outputBoxSize))] = ((-103/(iterationMidpoint-1))*(((escapeCount[i]+mode3ModuloOffset)%maxIterations)-iterationMidpoint))+140;
+		imgData.data[3+((glowXArray[i]*4)+((glowYArray[i])*8*outputBoxSize))] = 255;
+
+		imgData.data[0+((glowXArray2[i]*4)+((glowYArray2[i])*8*outputBoxSize))] = ((222/(iterationMidpoint-1))*(((escapeCount[i]+mode3ModuloOffset)%maxIterations)-iterationMidpoint))+31;
+		imgData.data[1+((glowXArray2[i]*4)+((glowYArray2[i])*8*outputBoxSize))] = ((86/(iterationMidpoint-1))*(((escapeCount[i]+mode3ModuloOffset)%maxIterations)-iterationMidpoint))+145;
+		imgData.data[2+((glowXArray2[i]*4)+((glowYArray2[i])*8*outputBoxSize))] = ((-103/(iterationMidpoint-1))*(((escapeCount[i]+mode3ModuloOffset)%maxIterations)-iterationMidpoint))+140;
+		imgData.data[3+((glowXArray2[i]*4)+((glowYArray2[i])*8*outputBoxSize))] = 255;
+
+		imgData.data[0+((glowXArray3[i]*4)+((glowYArray3[i])*8*outputBoxSize))] = ((222/(iterationMidpoint-1))*(((escapeCount[i]+mode3ModuloOffset)%maxIterations)-iterationMidpoint))+31;
+		imgData.data[1+((glowXArray3[i]*4)+((glowYArray3[i])*8*outputBoxSize))] = ((86/(iterationMidpoint-1))*(((escapeCount[i]+mode3ModuloOffset)%maxIterations)-iterationMidpoint))+145;
+		imgData.data[2+((glowXArray3[i]*4)+((glowYArray3[i])*8*outputBoxSize))] = ((-103/(iterationMidpoint-1))*(((escapeCount[i]+mode3ModuloOffset)%maxIterations)-iterationMidpoint))+140;
+		imgData.data[3+((glowXArray3[i]*4)+((glowYArray3[i])*8*outputBoxSize))] = 255;
+
+		imgData.data[0+((glowXArray4[i]*4)+((glowYArray4[i])*8*outputBoxSize))] = ((222/(iterationMidpoint-1))*(((escapeCount[i]+mode3ModuloOffset)%maxIterations)-iterationMidpoint))+31;
+		imgData.data[1+((glowXArray4[i]*4)+((glowYArray4[i])*8*outputBoxSize))] = ((86/(iterationMidpoint-1))*(((escapeCount[i]+mode3ModuloOffset)%maxIterations)-iterationMidpoint))+145;
+		imgData.data[2+((glowXArray4[i]*4)+((glowYArray4[i])*8*outputBoxSize))] = ((-103/(iterationMidpoint-1))*(((escapeCount[i]+mode3ModuloOffset)%maxIterations)-iterationMidpoint))+140;
+		imgData.data[3+((glowXArray4[i]*4)+((glowYArray4[i])*8*outputBoxSize))] = 255;
+
+} 
+
+
+	if (((escapeCount[i]+mode3ModuloOffset)%maxIterations)<iterationMidpoint){
+
+//highest escapeCount -> 253,231,37
+//midpoint escapeCount -> 31, 145, 140
+//lowest escapeCount -> 68,1,84
+
+		imgData.data[0+((glowXArray[i]*4)+((glowYArray[i])*8*outputBoxSize))] = ((37/(iterationMidpoint-1))*(((escapeCount[i]+mode3ModuloOffset)%maxIterations)))+31;
+		imgData.data[1+((glowXArray[i]*4)+((glowYArray[i])*8*outputBoxSize))] = ((143/(iterationMidpoint-1))*(((escapeCount[i]+mode3ModuloOffset)%maxIterations)))+1;
+		imgData.data[2+((glowXArray[i]*4)+((glowYArray[i])*8*outputBoxSize))] = ((56/(iterationMidpoint-1))*(((escapeCount[i]+mode3ModuloOffset)%maxIterations)))+84;
+		imgData.data[3+((glowXArray[i]*4)+((glowYArray[i])*8*outputBoxSize))] = 255;
+
+		imgData.data[0+((glowXArray2[i]*4)+((glowYArray2[i])*8*outputBoxSize))] = ((37/(iterationMidpoint-1))*(((escapeCount[i]+mode3ModuloOffset)%maxIterations)))+31;
+		imgData.data[1+((glowXArray2[i]*4)+((glowYArray2[i])*8*outputBoxSize))] = ((143/(iterationMidpoint-1))*(((escapeCount[i]+mode3ModuloOffset)%maxIterations)))+1;
+		imgData.data[2+((glowXArray2[i]*4)+((glowYArray2[i])*8*outputBoxSize))] = ((56/(iterationMidpoint-1))*(((escapeCount[i]+mode3ModuloOffset)%maxIterations)))+84;
+		imgData.data[3+((glowXArray2[i]*4)+((glowYArray2[i])*8*outputBoxSize))] = 255;
+
+		imgData.data[0+((glowXArray3[i]*4)+((glowYArray3[i])*8*outputBoxSize))] = ((37/(iterationMidpoint-1))*(((escapeCount[i]+mode3ModuloOffset)%maxIterations)))+31;
+		imgData.data[1+((glowXArray3[i]*4)+((glowYArray3[i])*8*outputBoxSize))] = ((143/(iterationMidpoint-1))*(((escapeCount[i]+mode3ModuloOffset)%maxIterations)))+1;
+		imgData.data[2+((glowXArray3[i]*4)+((glowYArray3[i])*8*outputBoxSize))] = ((56/(iterationMidpoint-1))*(((escapeCount[i]+mode3ModuloOffset)%maxIterations)))+84;
+		imgData.data[3+((glowXArray3[i]*4)+((glowYArray3[i])*8*outputBoxSize))] = 255;
+
+		imgData.data[0+((glowXArray4[i]*4)+((glowYArray4[i])*8*outputBoxSize))] = ((37/(iterationMidpoint-1))*(((escapeCount[i]+mode3ModuloOffset)%maxIterations)))+31;
+		imgData.data[1+((glowXArray4[i]*4)+((glowYArray4[i])*8*outputBoxSize))] = ((143/(iterationMidpoint-1))*(((escapeCount[i]+mode3ModuloOffset)%maxIterations)))+1;
+		imgData.data[2+((glowXArray4[i]*4)+((glowYArray4[i])*8*outputBoxSize))] = ((56/(iterationMidpoint-1))*(((escapeCount[i]+mode3ModuloOffset)%maxIterations)))+84;
+		imgData.data[3+((glowXArray4[i]*4)+((glowYArray4[i])*8*outputBoxSize))] = 255;
+
+}
+
+}
+}
+
+/////COLORMODE4
+
+	if (colorMode==4){
+
+	let iterationMidpoint=Math.round(maxIterations/2);
+
+//mode 4 emulates plasma from matplotlib with RGB ranges 240-13 (midpoint ~204); 249, 8 (midpoint ~71); 33-135 (midpoint ~120); mode 3 also has a mode4ModuloOffset parameter.
+
+//high 240,249,33
+//midpoint - 204,71,120
+//low - 13,8,135
+
+
+	const glowXArray=[];
+	const glowYArray=[];
+		const glowXArray2=[];
+	const glowYArray2=[];
+		const glowXArray3=[];
+	const glowYArray3=[];
+		const glowXArray4=[];
+	const glowYArray4=[];
+	for (let i = 0; i < escapeCount.length-1; i++){
+		let escapeIncrement=255/maxIterations;
+
+		let x=(2*outputBoxSize)+(-1*((Math.floor(i/outputBoxSize+1))%(outputBoxSize+1)));
+		let y=outputBoxSize-((i%outputBoxSize));
+		glowXArray.push(x);
+		glowYArray.push(y);
+		let x2=(2*outputBoxSize)+(((Math.floor(i/outputBoxSize+1))%(outputBoxSize+1)));
+		let y2=outputBoxSize-((i%outputBoxSize));
+		glowXArray2.push(x2);
+		glowYArray2.push(y2-1);
+				let x3=(2*outputBoxSize)+(((Math.floor(i/outputBoxSize+1))%(outputBoxSize+1)));
+		let y3=outputBoxSize+((i%outputBoxSize));
+		glowXArray3.push(x3);
+		glowYArray3.push(y3-1);
+		let x4=(2*outputBoxSize)+(-1*((Math.floor(i/outputBoxSize+1))%(outputBoxSize+1)));
+		let y4=outputBoxSize+((i%outputBoxSize));
+		glowXArray4.push(x4);
+		glowYArray4.push(y4);
+		
+if (((escapeCount[i]+mode4ModuloOffset)%maxIterations)==iterationMidpoint){ 
+		imgData.data[0+((glowXArray[i]*4)+((glowYArray[i])*8*outputBoxSize))] = 204;
+		imgData.data[1+((glowXArray[i]*4)+((glowYArray[i])*8*outputBoxSize))] = 71;
+		imgData.data[2+((glowXArray[i]*4)+((glowYArray[i])*8*outputBoxSize))] = 120;
+		imgData.data[3+((glowXArray[i]*4)+((glowYArray[i])*8*outputBoxSize))] = 255;
+
+		imgData.data[0+((glowXArray2[i]*4)+((glowYArray2[i])*8*outputBoxSize))] = 204;
+		imgData.data[1+((glowXArray2[i]*4)+((glowYArray2[i])*8*outputBoxSize))] = 71;
+		imgData.data[2+((glowXArray2[i]*4)+((glowYArray2[i])*8*outputBoxSize))] = 120;
+		imgData.data[3+((glowXArray2[i]*4)+((glowYArray2[i])*8*outputBoxSize))] = 255;
+
+		imgData.data[0+((glowXArray3[i]*4)+((glowYArray3[i])*8*outputBoxSize))] = 204;
+		imgData.data[1+((glowXArray3[i]*4)+((glowYArray3[i])*8*outputBoxSize))] = 71;
+		imgData.data[2+((glowXArray3[i]*4)+((glowYArray3[i])*8*outputBoxSize))] = 120;
+		imgData.data[3+((glowXArray3[i]*4)+((glowYArray3[i])*8*outputBoxSize))] = 255;
+
+		imgData.data[0+((glowXArray4[i]*4)+((glowYArray4[i])*8*outputBoxSize))] = 204;
+		imgData.data[1+((glowXArray4[i]*4)+((glowYArray4[i])*8*outputBoxSize))] = 71;
+		imgData.data[2+((glowXArray4[i]*4)+((glowYArray4[i])*8*outputBoxSize))] = 120;
+		imgData.data[3+((glowXArray4[i]*4)+((glowYArray4[i])*8*outputBoxSize))] = 255;
+} else if (((escapeCount[i]+mode4ModuloOffset)%maxIterations)>iterationMidpoint){ 
+
+//high 240,249,33
+//midpoint - 204,71,120
+//low - 13,8,135
+
+	
+		imgData.data[0+((glowXArray[i]*4)+((glowYArray[i])*8*outputBoxSize))] = ((36/(iterationMidpoint-1))*(((escapeCount[i]+mode4ModuloOffset)%maxIterations)-iterationMidpoint))+204;
+		imgData.data[1+((glowXArray[i]*4)+((glowYArray[i])*8*outputBoxSize))] = ((178/(iterationMidpoint-1))*(((escapeCount[i]+mode4ModuloOffset)%maxIterations)-iterationMidpoint))+71;
+		imgData.data[2+((glowXArray[i]*4)+((glowYArray[i])*8*outputBoxSize))] = ((-87/(iterationMidpoint-1))*(((escapeCount[i]+mode4ModuloOffset)%maxIterations)-iterationMidpoint))+120;
+		imgData.data[3+((glowXArray[i]*4)+((glowYArray[i])*8*outputBoxSize))] = 255;
+
+		imgData.data[0+((glowXArray2[i]*4)+((glowYArray2[i])*8*outputBoxSize))] = ((36/(iterationMidpoint-1))*(((escapeCount[i]+mode4ModuloOffset)%maxIterations)-iterationMidpoint))+204;
+		imgData.data[1+((glowXArray2[i]*4)+((glowYArray2[i])*8*outputBoxSize))] = ((178/(iterationMidpoint-1))*(((escapeCount[i]+mode4ModuloOffset)%maxIterations)-iterationMidpoint))+71;
+		imgData.data[2+((glowXArray2[i]*4)+((glowYArray2[i])*8*outputBoxSize))] = ((-87/(iterationMidpoint-1))*(((escapeCount[i]+mode4ModuloOffset)%maxIterations)-iterationMidpoint))+120;
+		imgData.data[3+((glowXArray2[i]*4)+((glowYArray2[i])*8*outputBoxSize))] = 255;
+
+		imgData.data[0+((glowXArray3[i]*4)+((glowYArray3[i])*8*outputBoxSize))] = ((36/(iterationMidpoint-1))*(((escapeCount[i]+mode4ModuloOffset)%maxIterations)-iterationMidpoint))+204;
+		imgData.data[1+((glowXArray3[i]*4)+((glowYArray3[i])*8*outputBoxSize))] = ((178/(iterationMidpoint-1))*(((escapeCount[i]+mode4ModuloOffset)%maxIterations)-iterationMidpoint))+71;
+		imgData.data[2+((glowXArray3[i]*4)+((glowYArray3[i])*8*outputBoxSize))] = ((-87/(iterationMidpoint-1))*(((escapeCount[i]+mode4ModuloOffset)%maxIterations)-iterationMidpoint))+120;
+		imgData.data[3+((glowXArray3[i]*4)+((glowYArray3[i])*8*outputBoxSize))] = 255;
+
+		imgData.data[0+((glowXArray4[i]*4)+((glowYArray4[i])*8*outputBoxSize))] = ((36/(iterationMidpoint-1))*(((escapeCount[i]+mode4ModuloOffset)%maxIterations)-iterationMidpoint))+204;
+		imgData.data[1+((glowXArray4[i]*4)+((glowYArray4[i])*8*outputBoxSize))] = ((178/(iterationMidpoint-1))*(((escapeCount[i]+mode4ModuloOffset)%maxIterations)-iterationMidpoint))+71;
+		imgData.data[2+((glowXArray4[i]*4)+((glowYArray4[i])*8*outputBoxSize))] = ((-87/(iterationMidpoint-1))*(((escapeCount[i]+mode4ModuloOffset)%maxIterations)-iterationMidpoint))+120;
+		imgData.data[3+((glowXArray4[i]*4)+((glowYArray4[i])*8*outputBoxSize))] = 255;
+
+} 
+
+
+	if (((escapeCount[i]+mode4ModuloOffset)%maxIterations)<iterationMidpoint){
+
+//high 240,249,33
+//midpoint - 204,71,120
+//low - 13,8,135
+
+		imgData.data[0+((glowXArray[i]*4)+((glowYArray[i])*8*outputBoxSize))] = ((191/(iterationMidpoint-1))*(((escapeCount[i]+mode4ModuloOffset)%maxIterations)))+13;
+		imgData.data[1+((glowXArray[i]*4)+((glowYArray[i])*8*outputBoxSize))] = ((63/(iterationMidpoint-1))*(((escapeCount[i]+mode4ModuloOffset)%maxIterations)))+8;
+		imgData.data[2+((glowXArray[i]*4)+((glowYArray[i])*8*outputBoxSize))] = ((-15/(iterationMidpoint-1))*(((escapeCount[i]+mode4ModuloOffset)%maxIterations)))+135;
+		imgData.data[3+((glowXArray[i]*4)+((glowYArray[i])*8*outputBoxSize))] = 255;
+
+		imgData.data[0+((glowXArray2[i]*4)+((glowYArray2[i])*8*outputBoxSize))] = ((191/(iterationMidpoint-1))*(((escapeCount[i]+mode4ModuloOffset)%maxIterations)))+13;
+		imgData.data[1+((glowXArray2[i]*4)+((glowYArray2[i])*8*outputBoxSize))] = ((63/(iterationMidpoint-1))*(((escapeCount[i]+mode4ModuloOffset)%maxIterations)))+8;
+		imgData.data[2+((glowXArray2[i]*4)+((glowYArray2[i])*8*outputBoxSize))] = ((-15/(iterationMidpoint-1))*(((escapeCount[i]+mode4ModuloOffset)%maxIterations)))+135;
+		imgData.data[3+((glowXArray2[i]*4)+((glowYArray2[i])*8*outputBoxSize))] = 255;
+
+		imgData.data[0+((glowXArray3[i]*4)+((glowYArray3[i])*8*outputBoxSize))] = ((191/(iterationMidpoint-1))*(((escapeCount[i]+mode4ModuloOffset)%maxIterations)))+13;
+		imgData.data[1+((glowXArray3[i]*4)+((glowYArray3[i])*8*outputBoxSize))] = ((63/(iterationMidpoint-1))*(((escapeCount[i]+mode4ModuloOffset)%maxIterations)))+8;
+		imgData.data[2+((glowXArray3[i]*4)+((glowYArray3[i])*8*outputBoxSize))] = ((-15/(iterationMidpoint-1))*(((escapeCount[i]+mode4ModuloOffset)%maxIterations)))+135;
+		imgData.data[3+((glowXArray3[i]*4)+((glowYArray3[i])*8*outputBoxSize))] = 255;
+
+		imgData.data[0+((glowXArray4[i]*4)+((glowYArray4[i])*8*outputBoxSize))] = ((191/(iterationMidpoint-1))*(((escapeCount[i]+mode4ModuloOffset)%maxIterations)))+13;
+		imgData.data[1+((glowXArray4[i]*4)+((glowYArray4[i])*8*outputBoxSize))] = ((63/(iterationMidpoint-1))*(((escapeCount[i]+mode4ModuloOffset)%maxIterations)))+8;
+		imgData.data[2+((glowXArray4[i]*4)+((glowYArray4[i])*8*outputBoxSize))] = ((-15/(iterationMidpoint-1))*(((escapeCount[i]+mode4ModuloOffset)%maxIterations)))+135;
+		imgData.data[3+((glowXArray4[i]*4)+((glowYArray4[i])*8*outputBoxSize))] = 255;
+
+}
+
+}
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+/*
+//  const imgData = ctx.getImageData(0, 0, 2*outputBoxSize, 2*outputBoxSize);
+
+//	const imgData = [];
+  // invert colors
+  for (let i = 0; i < escapeCount.length; i += 4) {
+    imgData.data[i] = 255 - escapeCount[i];
+    imgData.data[i+1] = 255 - escapeCount[i];
+    imgData.data[i+2] = 255 - escapeCount[i];
+    imgData.data[i+3] = 255;
+  }
+
+*/
+
+if (fourQuadrantBypass==0){
+ctx.putImageData(imgData, 0, 0);
+}
+
+
+if (whichFractal==1){
+	var fractalLabel="Mandelbrot";
+} else if (whichFractal==3){
+	var fractalLabel="Tricorn";
+}
+
+
+</script>
+
+///
+//canvas for zooming in on a single orthant
+<canvas id="zoomCanvas" width="2000" height="2000" style="border:1px solid grey"></canvas>
+
+<!--
+<a id="download2" download="cHex FractZm .jpg" href="" onclick="download_img(this);">Download zoomin to cHex FractZm.jpg</a>
+-->
+
+      <script type="text/javascript">
+        document.write('<a id="download2" download="cHex FractZm s' + realOrthantSign + 's' + imOrthantSign + ' ' + fractalLabel + ' ' + exponent + ' x' + upperLeftX + ' y' + upperLeftY + ' ' + zoomIndex + ' zm' + magFactor + '.jpg" href="" onclick="download_img(this);">Download zoomin to cHex FractZm.jpg</a>')
+      </script>
+
+
+<script>
+const canvasz = document.getElementById("zoomCanvas");
+const ctxz = canvasz.getContext("2d");
+ctxz.imageSmoothingEnabled = true;
+ctxz.imageSmoothingQuality = "high";
+canvasz.height = canvasz.width;
+ctxz.transform(1, 0, 0, -1, 0, canvasz.height)
+
+download_img = function(ell) {
+  // get image URI from canvas object
+  var imageURI = canvasz.toDataURL("image/realOrthantSign imOrthantSign");
+  ell.href = imageURI;
+};
+
+const imgDataz = ctxz.createImageData(outputBoxSize, outputBoxSize);
+
+/////COLORMODE3
+
+
+	if (colorMode==3){
+
+	let iterationMidpoint=Math.round(maxIterations/2);
+
+//highest escapeCount -> 253,231,37
+//midpoint escapeCount -> 31, 145, 140
+//lowest escapeCount -> 68,1,84
+	const glowXArray=[];
+	const glowYArray=[];
+		const glowXArray2=[];
+	const glowYArray2=[];
+		const glowXArray3=[];
+	const glowYArray3=[];
+		const glowXArray4=[];
+	const glowYArray4=[];
+	for (let i = 0; i < escapeCount.length-1; i++){
+		let escapeIncrement=255/maxIterations;
+
+		let x=(2*outputBoxSize)+(-1*((Math.floor(i/outputBoxSize+1))%(outputBoxSize+1)));
+		let y=outputBoxSize-((i%outputBoxSize));
+		glowXArray.push(x);
+		glowYArray.push(y);
+		let x2=(2*outputBoxSize)+(((Math.floor(i/outputBoxSize+1))%(outputBoxSize+1)));
+		let y2=outputBoxSize-((i%outputBoxSize));
+		glowXArray2.push(x2);
+		glowYArray2.push(y2-1);
+				let x3=(2*outputBoxSize)+(((Math.floor(i/outputBoxSize+1))%(outputBoxSize+1)));
+		let y3=outputBoxSize+((i%outputBoxSize));
+		glowXArray3.push(x3);
+		glowYArray3.push(y3-1);
+		let x4=(2*outputBoxSize)+(-1*((Math.floor(i/outputBoxSize+1))%(outputBoxSize+1)));
+		let y4=outputBoxSize+((i%outputBoxSize));
+		glowXArray4.push(x4);
+		glowYArray4.push(y4);
+		
+if (((escapeCount[i]+mode3ModuloOffset)%maxIterations)==iterationMidpoint){ 31, 145, 140
+		imgDataz.data[0+((glowXArray[i]*4)+((glowYArray[i])*4*outputBoxSize))] = 31;
+		imgDataz.data[1+((glowXArray[i]*4)+((glowYArray[i])*4*outputBoxSize))] = 145;
+		imgDataz.data[2+((glowXArray[i]*4)+((glowYArray[i])*4*outputBoxSize))] = 140;
+		imgDataz.data[3+((glowXArray[i]*4)+((glowYArray[i])*4*outputBoxSize))] = 255;
+
+
+} else if (((escapeCount[i]+mode3ModuloOffset)%maxIterations)>iterationMidpoint){ 
+
+//highest escapeCount -> 253,231,37
+//midpoint escapeCount -> 31, 145, 140
+//lowest escapeCount -> 68,1,84
+
+	
+		imgDataz.data[0+((glowXArray[i]*4)+((glowYArray[i])*4*outputBoxSize))] = ((222/(iterationMidpoint-1))*(((escapeCount[i]+mode3ModuloOffset)%maxIterations)-iterationMidpoint))+31;
+		imgDataz.data[1+((glowXArray[i]*4)+((glowYArray[i])*4*outputBoxSize))] = ((86/(iterationMidpoint-1))*(((escapeCount[i]+mode3ModuloOffset)%maxIterations)-iterationMidpoint))+145;
+		imgDataz.data[2+((glowXArray[i]*4)+((glowYArray[i])*4*outputBoxSize))] = ((-103/(iterationMidpoint-1))*(((escapeCount[i]+mode3ModuloOffset)%maxIterations)-iterationMidpoint))+140;
+		imgDataz.data[3+((glowXArray[i]*4)+((glowYArray[i])*4*outputBoxSize))] = 255;
+
+} 
+
+
+	if (((escapeCount[i]+mode3ModuloOffset)%maxIterations)<iterationMidpoint){
+
+//highest escapeCount -> 253,231,37
+//midpoint escapeCount -> 31, 145, 140
+//lowest escapeCount -> 68,1,84
+
+		imgDataz.data[0+((glowXArray[i]*4)+((glowYArray[i])*4*outputBoxSize))] = ((37/(iterationMidpoint-1))*(((escapeCount[i]+mode3ModuloOffset)%maxIterations)))+31;
+		imgDataz.data[1+((glowXArray[i]*4)+((glowYArray[i])*4*outputBoxSize))] = ((143/(iterationMidpoint-1))*(((escapeCount[i]+mode3ModuloOffset)%maxIterations)))+1;
+		imgDataz.data[2+((glowXArray[i]*4)+((glowYArray[i])*4*outputBoxSize))] = ((56/(iterationMidpoint-1))*(((escapeCount[i]+mode3ModuloOffset)%maxIterations)))+84;
+		imgDataz.data[3+((glowXArray[i]*4)+((glowYArray[i])*4*outputBoxSize))] = 255;
+
+
+}
+
+}
+}
+
+
+/////COLORMODE4
+
+	if (colorMode==4){
+
+	let iterationMidpoint=Math.round(maxIterations/2);
+
+//mode 4 emulates plasma from matplotlib with RGB ranges 240-13 (midpoint ~204); 249, 8 (midpoint ~71); 33-135 (midpoint ~120); mode 3 also has a mode4ModuloOffset parameter.
+
+//high 240,249,33
+//midpoint - 204,71,120
+//low - 13,8,135
+
+	const glowXArray=[];
+	const glowYArray=[];
+		const glowXArray2=[];
+	const glowYArray2=[];
+		const glowXArray3=[];
+	const glowYArray3=[];
+		const glowXArray4=[];
+	const glowYArray4=[];
+	for (let i = 0; i < escapeCount.length-1; i++){
+		let escapeIncrement=255/maxIterations;
+
+		let x=(outputBoxSize)+(-1*((Math.floor(i/outputBoxSize+1))%(outputBoxSize+1)));
+		let y=outputBoxSize-((i%outputBoxSize));
+		glowXArray.push(x);
+		glowYArray.push(y);
+		let x2=(2*outputBoxSize)+(((Math.floor(i/outputBoxSize+1))%(outputBoxSize+1)));
+		let y2=outputBoxSize-((i%outputBoxSize));
+		glowXArray2.push(x2);
+		glowYArray2.push(y2-1);
+				let x3=(2*outputBoxSize)+(((Math.floor(i/outputBoxSize+1))%(outputBoxSize+1)));
+		let y3=outputBoxSize+((i%outputBoxSize));
+		glowXArray3.push(x3);
+		glowYArray3.push(y3-1);
+		let x4=(2*outputBoxSize)+(-1*((Math.floor(i/outputBoxSize+1))%(outputBoxSize+1)));
+		let y4=outputBoxSize+((i%outputBoxSize));
+		glowXArray4.push(x4);
+		glowYArray4.push(y4);
+		
+if (((escapeCount[i]+mode4ModuloOffset)%maxIterations)==iterationMidpoint){ 
+		imgDataz.data[0+((glowXArray[i]*4)+((glowYArray[i])*4*outputBoxSize))] = 204;
+		imgDataz.data[1+((glowXArray[i]*4)+((glowYArray[i])*4*outputBoxSize))] = 71;
+		imgDataz.data[2+((glowXArray[i]*4)+((glowYArray[i])*4*outputBoxSize))] = 120;
+		imgDataz.data[3+((glowXArray[i]*4)+((glowYArray[i])*4*outputBoxSize))] = 255;
+
+} else if (((escapeCount[i]+mode4ModuloOffset)%maxIterations)>iterationMidpoint){ 
+
+//high 240,249,33
+//midpoint - 204,71,120
+//low - 13,8,135
+
+	
+		imgDataz.data[0+((glowXArray[i]*4)+((glowYArray[i])*4*outputBoxSize))] = ((36/(iterationMidpoint-1))*(((escapeCount[i]+mode4ModuloOffset)%maxIterations)-iterationMidpoint))+204;
+		imgDataz.data[1+((glowXArray[i]*4)+((glowYArray[i])*4*outputBoxSize))] = ((178/(iterationMidpoint-1))*(((escapeCount[i]+mode4ModuloOffset)%maxIterations)-iterationMidpoint))+71;
+		imgDataz.data[2+((glowXArray[i]*4)+((glowYArray[i])*4*outputBoxSize))] = ((-87/(iterationMidpoint-1))*(((escapeCount[i]+mode4ModuloOffset)%maxIterations)-iterationMidpoint))+120;
+		imgDataz.data[3+((glowXArray[i]*4)+((glowYArray[i])*4*outputBoxSize))] = 255;
+
+}
+
+	if (((escapeCount[i]+mode4ModuloOffset)%maxIterations)<iterationMidpoint){
+
+//high 240,249,33
+//midpoint - 204,71,120
+//low - 13,8,135
+
+		imgDataz.data[0+((glowXArray[i]*4)+((glowYArray[i])*4*outputBoxSize))] = ((191/(iterationMidpoint-1))*(((escapeCount[i]+mode4ModuloOffset)%maxIterations)))+13;
+		imgDataz.data[1+((glowXArray[i]*4)+((glowYArray[i])*4*outputBoxSize))] = ((63/(iterationMidpoint-1))*(((escapeCount[i]+mode4ModuloOffset)%maxIterations)))+8;
+		imgDataz.data[2+((glowXArray[i]*4)+((glowYArray[i])*4*outputBoxSize))] = ((-15/(iterationMidpoint-1))*(((escapeCount[i]+mode4ModuloOffset)%maxIterations)))+135;
+		imgDataz.data[3+((glowXArray[i]*4)+((glowYArray[i])*4*outputBoxSize))] = 255;
+
+
+}
+
+}
+}
+
+ctxz.putImageData(imgDataz, 0, 0);
+
+
+///
+
+</script>
+<br>if in one-orthant mode, the bottom row extends from approximately magnitude:
+      <script type="text/javascript">
+        document.write("<em>" + realParts[outputBoxSize-1].toString() + "</em>")
+      </script>
+  to magnitude:
+      <script type="text/javascript">
+        document.write(realParts[0].toString())
+      </script>
+<br>
+<br>the height extends from magnitude:
+       <script type="text/javascript">
+        document.write(imParts[0].toString())
+      </script>
+   to approximately magnitude:
+      <script type="text/javascript">
+        document.write(imParts[outputBoxSize-1].toString())
+      </script>
+<br>
+
+
+</body>
+</html> 
