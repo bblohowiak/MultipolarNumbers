@@ -26,7 +26,7 @@ body {  background-color: white;
 v0.0.2 
 <!--
 v0.0.1 - First version
-v0.0.2 - Added glitch mode, safe/accurate mode toggle. Fixed render progress indicator.
+v0.0.2 - Added glitch mode, safe/accurate mode toggle.
 -->
 <table>
   <tr>
@@ -113,7 +113,7 @@ v0.0.2 - Added glitch mode, safe/accurate mode toggle. Fixed render progress ind
     <script>
     
 function showParameters(){    
-                  
+            fractGlitch="Fract";      
             whichFractal = Number(document.getElementById("whichFractalInput").value);
 	if (whichFractal<10){
 parameters02="      <label for='exponentInput'><b>Exponent (n): </b></label><input type='number' id='exponentInput' min='2' max='9999' step='1' value='2' oninput='validity.valid||(value=&quot;&quot;);'>";
@@ -159,7 +159,7 @@ parameters0S="<label for='outputSizeInput'><b>Orthant size (bigger inputs -> lon
 } 
 
 function showParameters2(){    
-
+			fractGlitch="Glitch";
 
             whichFractal = Number(document.getElementById("whichFractalInput").value);
 	if (whichFractal<10){
@@ -206,7 +206,7 @@ parameters0S="<label for='outputSizeInput'><b>Orthant size (bigger inputs -> lon
 }
 } 
  
- 
+var fractGlitch="Fract"; 
 var oneOrthantMode=0;
 var fourQuadrantBypass=0;
 var maxIterations = 100;
@@ -338,7 +338,7 @@ if (whichFractal==7){var fractalLabel="TricornSC";}
 if (whichFractal==10){var fractalLabel="splitMandelbrot"; realSign="pltCm"; imSign="pltCm";}
 if (whichFractal==11){var fractalLabel="splitTricorn"; realSign="pltCm"; imSign="pltCm";}
 
-	let filename = "cHexFract s"+realSign+"s"+imSign+" "+fractalLabel+" "+exponent+"  x"+upperLeftX+" y"+upperLeftY+" itr"+maxIterations+" mode"+colorMode+" mod"+mode2ModuloIterationSelectionParameter/.0157+" "+" zm"+zoomIndex;
+	let filename = "cHex"+fractGlitch+" s"+realSign+"s"+imSign+" "+fractalLabel+" "+exponent+"  x"+upperLeftX+" y"+upperLeftY+" itr"+maxIterations+" mode"+colorMode+" mod"+mode2ModuloIterationSelectionParameter/.0157+" "+" zm"+zoomIndex;
 
             output = "<canvas id='myCanvas' width="+(canvasSize-1)+" height="+(canvasSize-1)+" style='border:1px solid grey'></canvas><br><a id='download' download='"+filename+".jpg' href='' onclick='download_img(this);'>Download this image named with its parameters</a>";
             
