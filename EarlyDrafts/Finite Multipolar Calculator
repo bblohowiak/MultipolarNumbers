@@ -1,0 +1,400 @@
+
+<!DOCTYPE html>
+<html lang="en">
+    <meta charset="UTF-8">
+
+<title>Finite Multipolar Calculator</title>
+
+<style>
+h1 {
+  font-family: "Courier New", Courier, monospace;
+}
+body {  background-color: white;
+  color: black;
+    font-family: "Courier New", Courier, monospace;
+  }
+  canvas {  background-color: white;
+  color: white;}
+  th, td {
+  padding: 7px;
+    border: 1px solid black;
+  border-collapse: collapse;
+}
+</style>
+<body>
+
+  <script>
+        
+        //begin function declarations
+
+function consolidate(a,b,c,d,e,f,g,h){
+//a,c,e,g must be 0 if mod2, i.e. even or 0
+//a,c must be even or 0, twice the sign index (e.g., identity=0, sequitive=2, trinitive=4, quadritive=6, etc.). 
+	const consolidArray=[];
+	let realSign=0;
+	let imSign=0;
+	let realMag=0;
+	let imMag=0;
+
+	if (a==e){
+		realMag=b+f;
+	} else {
+		realMag=Math.abs(b-f);
+}
+
+	if (c==g){
+		imMag=d+h;
+	} else {
+		imMag=Math.abs(d-h);
+}
+
+	if (a==e && (b+f) != 0){
+	realSign=a;	
+	}
+	
+	if(b>f){
+	realSign=a;
+} 	
+
+	if (f>b){
+	realSign=e;
+} 	
+
+	if (b+f==0){
+	realSign=0;	
+}
+
+	if (c==g && (d+h) != 0){
+	imSign=c;	
+	}
+	
+	if(d>h){
+	imSign=c;
+} 	
+
+	if (h>d){
+	imSign=g;
+} 	
+
+	if (d+h==0){
+	imSign=0;	
+}
+
+	consolidArray.push(realSign,realMag,imSign,imMag);
+
+consolid=consolidArray;
+
+return consolid;
+}	
+
+function gmpMultiply(a,b,c,d,e){
+//a,c must be even or 0, twice the sign index (e.g., identity=0, sequitive=2, trinitive=4, quadritive=6, etc.). e is the quantity of signs of the multipolar system.
+	const productArray=[];
+	let realSign1=0;
+	let realSign2=0;
+	let realMag1=0;
+	let realMag2=0;
+	let productMag=0;
+	let productSign=0;
+
+	if (b == 0 || d==0){
+	productSign=0;
+	} else {
+	productSign=(a+c)%(2*e);
+	}
+
+	productMag=b*d;
+
+	productArray.push(productSign,productMag);
+
+Product = productArray;
+
+return Product;
+}	
+        
+function gmpComplexMultiply(a,b,c,d,e,f,g,h,i){
+//a,c,e,g must be 0 if mod2, i.e. even or 0
+//i is the quantity of signs in the multipolar system
+	const productArray=[];
+	const productArray1=[];
+	const productArray2=[];
+	const consolidArray2=[];
+	const productArray3=[];
+	let productRealSign=0;
+	let productImSign=0;
+	let productRealMag=0;
+	let productImMag=0;
+	
+//First, Last...
+	productArray1.push(...gmpMultiply(a,b,e,f,i));
+	productArray1.push(...gmpMultiply(c,d,e,f,i));
+	productArray2.push(...gmpMultiply(c,d,g+2,h,i));
+	productArray2.push(...gmpMultiply(a,b,g,h,i));
+	const consolidArray1=productArray1.concat(...productArray2);
+	consolidArray2.push(...consolidate(...consolidArray1));
+
+gmpProduct = consolidArray2;
+
+return gmpProduct;
+console.log(" " +  "prduct " + gmpProduct);
+}	
+
+function gmpConjugate(a,b,c,d,e){
+//a,c must be even or 0
+//e is the quantity of signs in the multipolar system
+	let newImSign=(c+e)%(2*e);
+	const outputArray=[a,b,newImSign,d];
+	
+return outputArray;
+}
+
+function gmpModulusNatural(a,b,c,d,e){
+//a,c must be even or 0
+//e is the quantity of signs in the multipolar system > 1
+//[these moduli will have signs such that signvalue%4=0 and so the square root is the real-like component magnitude sqrt signed by signvalue/2.]
+const conjProductArray=[];
+let cStar = (c+e)%(2*e);
+
+conjProductArray.push(...gmpComplexMultiply(a,b,c,d,a,b,cStar,d,e));
+
+let realSign = conjProductArray[0];
+let realMag = conjProductArray[1];
+console.log(" " +  " " + realSign + conjProductArray[0]);
+realSign = realSign/2;
+realMag = Math.sqrt(realMag);
+console.log(" " +  " " + realSign);
+conjProductArray[0]=realSign;
+conjProductArray[1]=realMag;
+
+const sqrtArray=conjProductArray;
+
+
+//returns an array containing a sign, real-like magnitude, and two zeros.
+return sqrtArray;
+
+}
+
+function gmpModulusEuclidean(a,b,c,d,e){
+//e is the quantity of signs in the multipolar system > 1
+	let euclideanInterval=Math.sqrt((b**2)+(d**2));
+//returns a Real number >=0
+return euclideanInterval;
+
+}
+
+function gmpNaturalExponent(a,b,c,d,e,f){
+//a,c must be even or 0
+//e is the quantity of signs in the multipolar system > 1
+////f is exponent, must be positive integer greater than two (for now). a,c are signs expressed as even exponents of s. b, d are magnitudes.
+
+	const realSign=[a];
+	const realMag=[b];
+	const imSign=[c];
+	const imMag=[d];
+	const productArray=[];
+	const factorArray=[];
+	const Product=[];
+
+for  (let i = 0; i < f-1; i++){
+	
+	let realSign01=realSign[i];
+	let realMag01=realMag[i];
+	let imSign01=imSign[i];
+	let imMag01=imMag[i];
+	
+	productArray.push(...gmpComplexMultiply(a,b,c,d,realSign01,realMag01,imSign01,imMag01,e));
+	
+	realSign.push(productArray[(i*4)]);
+	realMag.push(productArray[(i*4)+1]);
+	imSign.push(productArray[(i*4)+2]);
+	imMag.push(productArray[(i*4)+3]);
+
+}
+
+	arrayLength=productArray.length;
+	
+	
+	let outputSign=productArray[arrayLength-4];
+	let outputMag=productArray[arrayLength-3];
+	let outputSign2=productArray[arrayLength-2];
+	let outputMag2=productArray[arrayLength-1];
+Product.push(outputSign,outputMag,outputSign2,outputMag2);
+//console.log("Product:" + Product);
+return Product;
+}	
+
+function gmpExpPowerSeries(a,b,c,d,e,n){
+//e is the quantity of signs in the multipolar system > 1
+//quotient zeroes out if n>170
+//if n=170, magnitude of argument too large if ~21pi
+
+//(0,1,17) yields a good approximation of e; (6,1,17) yields a good approximation of its multiplicative inverse.
+//multipolar units not in the complex plane converge to values other than e^-1 depending on whether their roots are real-like or imaginary-like.
+//exp(s1.57)-> orthant that a signed s under repeat self-multiplication bypasses
+
+
+function factorial(n){
+    if (n == 0)
+        return 1;
+    return n * factorial(n - 1);
+
+
+}
+
+	let consolid=consolidate(0,1,0,0,a,b,c,d);
+
+	for (let i=0; i<n-1;i++){
+	
+
+	let quotient=(gmpComplexMultiply(...gmpNaturalExponent(a,b,c,d,e,(i+2)),0,(1/(factorial(i+2))),0,0,e));
+	
+//console.log("quotient" + i + " :" + quotient);
+	
+	consolid=consolidate(...consolid,...quotient);
+	
+	let newSum=consolid;
+
+	}
+
+	let output=consolid;
+return output;	
+
+}
+
+function gmpMultiplicativeInverse(a,b,c,d,e){
+//a,c must be even or 0
+//e is the quantity of signs in the multipolar system > 1
+//complex multipolar multiplicative inverses are not necessarily unique; for powers of s, the cycles of exponentiation (e.g., s^pi/4, (s^5)^pi/4) contain multiplicative inverses for numbers contained in that cycle and their scalings. this function can compute multiplicative inverses across cycles of exponentiation except for the embedded conventional complex case due to its special properties (not some implementation cop-out). 
+	const inverseArray =[0,0,0,0,e];
+	const aArray01 =[a,b,0,0,e];
+	const bArray01 =[c,d,0,0,e];
+	const cArray01 =[0,0,0,0,e];
+	const dArray01 =[];
+	const dOverCArray=[e,d/b,0,0,e];
+	const productArray01=[];
+	const consolidArray01=[];
+	
+//aArray can't be denominator
+	if (b==0 && d!=0){
+//if a is 0, sequitive bd=1
+//magnitude of d = 1/|b|
+	dArray01[1]=1/bArray01[1];
+//sign of d = 1/sequitive b
+	dArray01[0]=(e*2)-(c+2)%(e*2);
+
+	inverseArray[2]=dArray01[0];
+	inverseArray[3]=dArray01[1];
+	}
+	
+	
+//bArray can't be denominator
+	if (d==0 && b!=0){
+//if b is 0, ac=1
+//magnitude of c = 1/|a|
+	cArray01[1]=1/aArray01[1];
+//sign of c = 1/a
+	cArray01[0]=(e*2)-(a)%(e*2);
+
+	inverseArray[0]=cArray01[0];
+	inverseArray[1]=cArray01[1];
+	}	
+	
+	
+	if (d !=0 && b!=0){
+	
+//if input magnitudes are unequal...
+		if (b!=d){
+//d/c*sequitive b
+productArray01.push(...gmpComplexMultiply((bArray01[0]+2)%(e*2),bArray01[1],bArray01[2],bArray01[3],...dOverCArray));
+
+//a + product array
+consolidArray01.push(...consolidate(aArray01[0],aArray01[1],aArray01[2],aArray01[3],productArray01[0],productArray01[1],productArray01[2],productArray01[3]));
+
+//multiplicative inverse of consolid array to c
+	cArray01[0]=((e*2)-consolidArray01[0])%(e*2);
+	cArray01[1]=1/consolidArray01[1];
+
+//c*(d/c) to d
+dArray01.push(...gmpComplexMultiply(cArray01[0],cArray01[1],cArray01[2],cArray01[3],...dOverCArray));
+dArray01[4]=e;
+console.log(dArray01);
+
+	inverseArray[0] = cArray01[0];
+	inverseArray[1] = cArray01[1];
+	inverseArray[2] = dArray01[0];
+	inverseArray[3] = dArray01[1];
+}else{
+//if input magnitudes are equal then c,d magnitudes are equal to each other
+//a*c=.5 and sequitive*b*d=.5		
+//c=1/2a
+	cArray01[0]=((e*2)-aArray01[0])%(2*e);
+	cArray01[1]=1/(aArray01[1]*2);
+
+//d=1/2*b*sequitive
+	dArray01[0]=((e*2)-(bArray01[0]+2))%(2*e);
+	dArray01[1]=1/(bArray01[1]*2);
+
+//console.log("barray"+bArray01);
+//console.log("darray"+dArray01);
+	inverseArray[0] = cArray01[0];
+	inverseArray[1] = cArray01[1];
+	inverseArray[2] = dArray01[0];
+	inverseArray[3] = dArray01[1];
+			
+		}
+}
+		
+	
+	if (b==d && b==0){
+	
+	inverseArray=[];
+	console.log("Undefined: Zero has no multiplicative inverse.");
+	}
+	
+ return inverseArray;
+
+} 
+
+function gmpForwardDivision(a,b,c,d,e,f,g,h,i){
+//accepts two complex numbers a,b,c,d by e,f,g,h and returns an array
+//a,c,e,g must be even or 0
+//i is the quantity of signs in the multipolar system > 1
+//"forward division" defined herein as multiplication of a "dividend" (a,b,c,d) with a multiplicative inverse of its "divisor (e,f,g,h)."
+//because multiplying can produce a zero quotient, as in some cases of conjugates, this "division" can also produce a zero quotient.
+	const quotientArray=[];
+quotientArray.push(...gmpComplexMultiply(a,b,c,d,...gmpMultiplicativeInverse(e,f,g,h,i),i))
+return quotientArray;
+}
+
+        //end function declarations
+//	for (let i=0; i<143; i++){
+
+
+//console.log(" " +  " " + i, gmpExpPowerSeries(0,0,0,1*((10*Math.PI/140)*i),6,170));
+//console.log(" " +  " " + i, gmpExpPowerSeries(6,1,0,0,6,17));
+//}
+        
+//console.log(" " +  "Modulus Natural:" + gmpModulusNatural(4,2,0,2,6,17));             
+//console.log(" " +  "Power Series:" + gmpExpPowerSeries(0,0,2,Math.PI,6,200));     
+//console.log(" " +  "Power Series:" + gmpExpPowerSeries(0,0,2,Math.PI*3,6,17));  
+//console.log(" " +  "Power Series:" + gmpExpPowerSeries(0,0,2,Math.PI*3,6,170));  
+//console.log(" " +  "Power Series:" + gmpExpPowerSeries(0,0,2,Math.PI*6,6,170));  
+//console.log(" " +  "Power Series:" + gmpExpPowerSeries(0,0,2,Math.PI*10,6,170));  
+        //as theta increases in magnitude, greater n is required to "reign in" the initial quotient addends
+//NaN failure at argument ~36 and n of 200.
+//NaN failure at argument ~54 and n of 176
+//argument ~33 and n of 176 the approximation slips, and then >33 exponential slip.
+
+console.log(gmpForwardDivision(0,25,0,0,6,5,0,0,6));
+console.log("MI"+gmpMultiplicativeInverse(8,.5,4,.5,6));
+//console.log(gmpComplexMultiply(6,.71,4,.71,6,.70422,6,.70422,6));
+console.log(gmpComplexMultiply(0,1,0,1,6,1,0,1,6));
+
+    </script>
+      <br><br><br>
+        
+    <br><br><br>
+&copy; 2025-Present, Ben Blohowiak<br><br>
+
+Questions? Feedback? <br><em>ben</em> at <em>benblohowiak dot com</em>
+</body>
