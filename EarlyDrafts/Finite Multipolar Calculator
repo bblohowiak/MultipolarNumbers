@@ -22,7 +22,7 @@ body {  background-color: white;
 }
 </style>
 <body>
-
+    <p id="demo"></p>
   <script>
         
         //begin function declarations
@@ -185,7 +185,7 @@ return euclideanInterval;
 function gmpNaturalExponent(a,b,c,d,e,f){
 //a,c must be even or 0
 //e is the quantity of signs in the multipolar system > 1
-////f is exponent, must be positive integer greater than two (for now). a,c are signs expressed as even exponents of s. b, d are magnitudes.
+////f is exponent, must be positive integer or zero. a,c are signs expressed as even exponents of s. b, d are magnitudes.
 
 	const realSign=[a];
 	const realMag=[b];
@@ -195,6 +195,27 @@ function gmpNaturalExponent(a,b,c,d,e,f){
 	const factorArray=[];
 	const Product=[];
 
+//IF F==0, IF F==1...
+
+	if (f==0){
+	
+		let outputSign=0;
+		let outputMag=1;
+		let outputSign2=0;
+		let outputMag2=0;
+		Product.push(outputSign,outputMag,outputSign2,outputMag2);
+}
+
+	if (f==1){
+	
+		let outputSign=a;
+		let outputMag=b;
+		let outputSign2=c;
+		let outputMag2=d;
+		Product.push(outputSign,outputMag,outputSign2,outputMag2);
+}
+
+	if (f>1){
 for  (let i = 0; i < f-1; i++){
 	
 	let realSign01=realSign[i];
@@ -219,6 +240,7 @@ for  (let i = 0; i < f-1; i++){
 	let outputSign2=productArray[arrayLength-2];
 	let outputMag2=productArray[arrayLength-1];
 Product.push(outputSign,outputMag,outputSign2,outputMag2);
+}
 //console.log("Product:" + Product);
 return Product;
 }	
@@ -227,7 +249,7 @@ function gmpExpPowerSeries(a,b,c,d,e,n){
 //e is the quantity of signs in the multipolar system > 1
 //quotient zeroes out if n>170
 //if n=170, magnitude of argument too large if ~21pi
-
+//plan to explore BIGINT as possible remedy
 //(0,1,17) yields a good approximation of e; (6,1,17) yields a good approximation of its multiplicative inverse.
 //multipolar units not in the complex plane converge to values other than e^-1 depending on whether their roots are real-like or imaginary-like.
 //exp(s1.57)-> orthant that a signed s under repeat self-multiplication bypasses
@@ -366,6 +388,302 @@ quotientArray.push(...gmpComplexMultiply(a,b,c,d,...gmpMultiplicativeInverse(e,f
 return quotientArray;
 }
 
+function gmpExponentiationCycle(a,b,c,d,e){
+//a,c must be even or 0
+//e is the quantity of signs in the multipolar system > 1
+
+//is this number in an orthant with a cycle of exponentiation? [check a,c ordered pair]
+//list the orthants associated with each cycle of natural exponentiation or lack thereof for e.	
+//for a multipolar number system with e signs, there are e/2 cycles of imaginary unit exponentiation.the "middle" one is isomorphic to the conventional complex plane.
+
+//for loops...(e-(e-1)) is the first natural exponent of s, cycle 1. it will contain e*2 orthants unless the cycle is for base s^(e/2), in which case it will only have four.
+//to get the other cycles, keep adding two to e-(e-1) and don't go past e-1. 
+
+//keys will be all possible ac values given e and then get for key ac the value that encodes exponentiation cycle index and orthant index.
+
+
+const map01 = new Map([
+  ["a", 2+"-"+3],
+  ["b", 7300],
+  ["c", 2700]
+]);
+
+	for (let i=0; i<(e/2);i++){
+		for (let j=0; j<(e*2)+1;j++){
+
+//if j==0, if j%2==0 && j!=0, if j%2!=0
+
+	if (j==0){
+	map01.set(0+"-"+0, 1+"-"+1);	
+	
+}
+	
+	if (j%2==0 && j!=0){
+		const product1=gmpNaturalExponent(0,0,(i*2),1,e,j);
+		const product2=gmpNaturalExponent(0,0,(i*2),1,e,(j-1));
+		let realProductSign = product1[0];
+		let imaginaryProductSign = product2[2];
+//console.log(i +"j"+ j+"realProductSign"+realProductSign+" "+imaginaryProductSign);
+map01.set(realProductSign+"-"+imaginaryProductSign, ((i*2)+1)+"-"+j);
+	
+	
+	if (i==((e/2)-2) && j>3){
+	j=(e*2);
+}
+}
+
+
+	if (j%2!=0){
+		const product1=gmpNaturalExponent(0,0,(i*2),1,e,(j-1));
+		const product2=gmpNaturalExponent(0,0,(i*2),1,e,j);
+		let realProductSign = product1[0];
+		let imaginaryProductSign = product2[2];
+//console.log(i +"j"+ j+"realProductSign"+realProductSign+" "+imaginaryProductSign);
+map01.set(realProductSign+"-"+imaginaryProductSign, ((i*2)+1)+"-"+j);
+
+	if (i==((e/2)-2) && j>3){
+	j=(e*2);
+}
+
+
+}
+
+}
+}
+
+const numb = map01.get(a+"-"+c);
+//console.log(numb);
+//document.getElementById("demo").innerHTML = "There are " + numb + " apples.";
+
+if (numb != undefined){
+//write a thing that parses numb for the cycleIndexArray
+const cycleIndexArray = numb.split('-');
+cycleIndexArray[0]=Number(cycleIndexArray[0]);
+cycleIndexArray[1]=Number(cycleIndexArray[1]);
+return cycleIndexArray;
+} else {
+const cycleIndexArray = [0,0];
+return cycleIndexArray;
+}
+//each orthant identified by cycle of exponentiation index with 0==none, 1==s, 3=s^3, etc.
+//complex plane identified with s^(e/2)
+//each orthant identified by position in cycle sequence with 1==0,0, 2==2,0, etc. 0==none
+//output is a two-element array with cycle number and orthant position e.g., 0, 0
+
+}
+
+function gmpArgument(a,b,c,d,e){
+//a,c must be even or 0
+//e is the quantity of signs in the multipolar system > 1
+//if b or d is zero this function defaults to the s^1 cycle.
+//output [cycle of exponentiation, argument (angle) magnitude in radians]
+
+	if (b==0){
+		a=c;
+}
+
+	if (d==0){
+		c=a;
+}
+
+
+	const exponentiationCycle = gmpExponentiationCycle(a,b,c,d,e);
+
+	if (exponentiationCycle[0] != 0){
+
+		let countOfTraversedOrthants=(exponentiationCycle[1]-1);
+			if (countOfTraversedOrthants == -1){
+			countOfTraversedOrthants = 0;	}	
+		
+		
+			let tail = countOfTraversedOrthants*Math.PI/2;
+//console.log(tail);
+
+			if (exponentiationCycle[1]%2==1){
+				var nose=Math.atan2(d, b);
+//console.log("nose"+nose);				
+} else {
+				var nose=Math.atan2(d, -b)-(Math.PI/2);
+//console.log("nose"+nose);		
+}
+
+	const argumentArray=[exponentiationCycle[0], tail+nose];	
+	return argumentArray;
+		
+}
+
+	if (exponentiationCycle[0] == 0){
+		const argumentArray=[0, 0];	
+		return argumentArray;
+	}
+}
+
+function gmpCosSin(a,b,e){
+//a is the cycle of exponentiation
+//b is the argument
+//e is the quantity of signs in the multipolar system > 1
+//outputs 0 for orthants that a signed s under repeat self-multiplication bypasses
+
+
+	let argumentNose=b%Math.PI;
+	let csRealMag=Math.abs(Math.cos(argumentNose));
+	let csImMag=Math.sin(argumentNose);
+	let orthantCount=((Math.floor(b/(Math.PI/2)))%(e*2))+1;
+
+
+const map01 = new Map([
+  ["a", 2+"-"+3],
+  ["b", 430],
+  ["c", 24]
+]);
+
+	for (let i=0; i<(e/2);i++){
+		for (let j=0; j<(e*2)+1;j++){
+
+//if j==0, if j%2==0 && j!=0, if j%2!=0
+
+	if (j==0){
+	map01.set(0+"-"+0, 1+"-"+1);	
+	
+}
+	
+	if (j%2==0 && j!=0){
+		const product1=gmpNaturalExponent(0,0,(i*2),1,e,j);
+		const product2=gmpNaturalExponent(0,0,(i*2),1,e,(j-1));
+		let realProductSign = product1[0];
+		let imaginaryProductSign = product2[2];
+//console.log(i +"j"+ j+"realProductSign"+realProductSign+" "+imaginaryProductSign);
+map01.set(((i*2)+1)+"-"+j, realProductSign+"-"+imaginaryProductSign);
+	
+	
+	if (i==((e/2)-2) && j>3){
+	j=(e*2);
+}
+}
+
+
+	if (j%2!=0){
+		const product1=gmpNaturalExponent(0,0,(i*2),1,e,(j-1));
+		const product2=gmpNaturalExponent(0,0,(i*2),1,e,j);
+		let realProductSign = product1[0];
+		let imaginaryProductSign = product2[2];
+//console.log(i +"j"+ j+"realProductSign"+realProductSign+" "+imaginaryProductSign);
+map01.set(((i*2)+1)+"-"+j, realProductSign+"-"+imaginaryProductSign);
+
+	if (i==((e/2)-2) && j>3){
+	j=(e*2);
+}
+
+
+}
+
+}
+}
+
+const numb = map01.get(a+"-"+orthantCount);
+console.log(numb);
+//document.getElementById("demo").innerHTML = "There are " + numb + " apples.";
+
+
+	if (numb != undefined){
+//write a thing that parses numb 
+		const signsArray = numb.split('-');
+		signsArray[0]=Number(signsArray[0]);
+		signsArray[1]=Number(signsArray[1]);
+
+		if (csRealMag==0){
+		var csRealSign=0;
+} else {
+		var csRealSign=signsArray[0];
+
+}
+	
+	if (csImMag==0){
+		var csImSign=0;
+} else {
+		var csImSign=signsArray[1];		
+}
+
+
+
+		const sinCosArray=[csRealSign,csRealMag,csImSign,csImMag];
+		return sinCosArray;
+} else {
+const signsArray = [0,0];
+const sinCosArray=[signsArray[0],0,signsArray[1],0];
+return sinCosArray;
+}
+
+}
+
+function gmpSqrt(a,b,c,d,e){
+//a,c must be even or 0
+//e is the quantity of signs in the multipolar system > 1
+//some numbers have more than one square root. this function returns only one root per input. a future version might incorporate more rationale (or parameters) for why it returns one root instead of another.
+
+let euclideanModulus=gmpModulusEuclidean(a,b,c,d,e);
+var realLikeMag01=0;
+var imLikeMag01=0;
+var realLikeSign01=0;
+var imLikeSign01=0;
+
+	if (a%4 == 0){
+	realLikeMag01=Math.sqrt((euclideanModulus+b)/2);	
+	imLikeMag01=Math.sqrt((euclideanModulus-b)/2);	
+	} else {
+	realLikeMag01=Math.sqrt((euclideanModulus-b)/2);	
+	imLikeMag01=Math.sqrt((euclideanModulus+b)/2);	
+	}
+
+let argumentArray=gmpArgument(a,b,c,d,e);
+    argumentArray[1]=argumentArray[1]/2;
+
+//console.log(argumentArray);
+
+const cosSinArray=gmpCosSin(...argumentArray,e);
+	cosSinArray[1]=realLikeMag01;
+	cosSinArray[3]=imLikeMag01;
+
+
+	if (argumentArray[0]==0 && argumentArray[1]==0){
+	
+//real signs will be 2*index except for e/2
+//for a given real sign x, there will be an imaginary sign x+((e/2)-1)%(e*2) 	
+//for a given real sign x, there will be an imaginary sign (x+e)+((e/2)-1)%(e*2) 
+//for a given real sign x, there will also be a real sign x+e
+
+//the real signs x or x+e will have the same sqrt real sign
+//that sqrt real sign will be x/2 if x/2%2==0
+//else if ((x+e)%(e*2))/2%2==0 
+	
+//you will have a&c. given a%2, the sign a' is either a/2 or ((a+e)%(e*2))/2
+//c' depends on c; for a given a, c' advances by a difference of e offset by the sign associated with i for the system ((e/2)-1))...decapolar,4 or 14 
+//does c==a'+4 or a'+14? that should give you c'
+//c-a'%(2*e)==c'
+
+		let aTest=(a/2)%2;
+			if (aTest==0){
+				var aPrime=a/2;
+} else {
+				var aPrime=((a+e)%(e*2))/2;			
+}
+
+		var cPrime=(c-aPrime)%(2*e)
+		cosSinArray[0]=aPrime;
+		cosSinArray[2]=cPrime;
+	
+	
+	}
+
+	if (cosSinArray[1]==0){cosSinArray[0]=0;}
+	if (cosSinArray[3]==0){cosSinArray[2]=0;}
+
+return cosSinArray;
+
+
+}
+
+
         //end function declarations
 //	for (let i=0; i<143; i++){
 
@@ -384,13 +702,26 @@ return quotientArray;
 //NaN failure at argument ~36 and n of 200.
 //NaN failure at argument ~54 and n of 176
 //argument ~33 and n of 176 the approximation slips, and then >33 exponential slip.
+//plan to explore BIGINT as possible remedy
 
 console.log(gmpForwardDivision(0,25,0,0,6,5,0,0,6));
 console.log("MI"+gmpMultiplicativeInverse(8,.5,4,.5,6));
 //console.log(gmpComplexMultiply(6,.71,4,.71,6,.70422,6,.70422,6));
 console.log(gmpComplexMultiply(0,1,0,1,6,1,0,1,6));
-
+console.log("NaturalExponent"+gmpNaturalExponent(0,2,0,3,6,2));
+console.log(gmpArgument(8,1,10,1,6));
+console.log("Sqert"+gmpSqrt(4,.4,6,.8,6));
+console.log(gmpNaturalExponent(2, 1.5723027555148466, 10, 2.544039299028138,6,2));
+console.log(gmpNaturalExponent(2, 5.5723027555148466, 10, 6.544039299028138,6,2));
+console.log(gmpNaturalExponent(2, .71, 10, 2.71, 6,2));
+console.log(gmpNaturalExponent(2, 3, 6, 5, 10,2));
+console.log(gmpNaturalExponent(2, 3, 16, 5, 10,2));
+console.log(gmpNaturalExponent(2, 5, 6, 3, 10,2));
+console.log(gmpNaturalExponent(2,0.8044958641907105,4,0.4972057878785785s, 6,2));
     </script>
+    
+    
+
       <br><br><br>
         
     <br><br><br>
