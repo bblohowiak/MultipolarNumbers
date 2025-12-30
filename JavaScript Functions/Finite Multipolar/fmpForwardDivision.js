@@ -5,6 +5,6 @@ function fmpForwardDivision(a,b,c,d,e,f,g,h,i){
 //"forward division" defined herein as multiplication of a "dividend" (a,b,c,d) with a multiplicative inverse of its "divisor (e,f,g,h)."
 //because multiplying can produce a zero quotient, as in some cases of conjugates, this "division" can also produce a zero quotient.
 	const quotientArray=[];
-quotientArray.push(...mpComplexMultiply(a,b,c,d,...mpMultiplicativeInverse(e,f,g,h,i),i))
+quotientArray.push(...fmpComplexMultiply(a,b,c,d,...fmpMultiplicativeInverse(e,f,g,h,i),i))
 return quotientArray;
 }
