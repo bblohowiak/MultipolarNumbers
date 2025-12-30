@@ -42,7 +42,7 @@ function fmpMultiplicativeInverse(a,b,c,d,e){
 //if input magnitudes are unequal...
 		if (b!=d){
 //d/c*sequitive b
-productArray01.push(...mpComplexMultiply((bArray01[0]+2)%(e*2),bArray01[1],bArray01[2],bArray01[3],...dOverCArray));
+productArray01.push(...fmpComplexMultiply((bArray01[0]+2)%(e*2),bArray01[1],bArray01[2],bArray01[3],...dOverCArray));
 
 //a + product array
 consolidArray01.push(...consolidate(aArray01[0],aArray01[1],aArray01[2],aArray01[3],productArray01[0],productArray01[1],productArray01[2],productArray01[3]));
@@ -52,7 +52,7 @@ consolidArray01.push(...consolidate(aArray01[0],aArray01[1],aArray01[2],aArray01
 	cArray01[1]=1/consolidArray01[1];
 
 //c*(d/c) to d
-dArray01.push(...mpComplexMultiply(cArray01[0],cArray01[1],cArray01[2],cArray01[3],...dOverCArray));
+dArray01.push(...fmpComplexMultiply(cArray01[0],cArray01[1],cArray01[2],cArray01[3],...dOverCArray));
 dArray01[4]=e;
 console.log(dArray01);
 
