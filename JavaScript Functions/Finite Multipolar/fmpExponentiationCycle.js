@@ -29,8 +29,8 @@ const map01 = new Map([
 }
 	
 	if (j%2==0 && j!=0){
-		const product1=mpNaturalExponent(0,0,(i*2),1,e,j);
-		const product2=mpNaturalExponent(0,0,(i*2),1,e,(j-1));
+		const product1=fmpNaturalExponent(0,0,(i*2),1,e,j);
+		const product2=fmpNaturalExponent(0,0,(i*2),1,e,(j-1));
 		let realProductSign = product1[0];
 		let imaginaryProductSign = product2[2];
 //console.log(i +"j"+ j+"realProductSign"+realProductSign+" "+imaginaryProductSign);
@@ -44,8 +44,8 @@ map01.set(realProductSign+"-"+imaginaryProductSign, ((i*2)+1)+"-"+j);
 
 
 	if (j%2!=0){
-		const product1=mpNaturalExponent(0,0,(i*2),1,e,(j-1));
-		const product2=mpNaturalExponent(0,0,(i*2),1,e,j);
+		const product1=fmpNaturalExponent(0,0,(i*2),1,e,(j-1));
+		const product2=fmpNaturalExponent(0,0,(i*2),1,e,j);
 		let realProductSign = product1[0];
 		let imaginaryProductSign = product2[2];
 //console.log(i +"j"+ j+"realProductSign"+realProductSign+" "+imaginaryProductSign);
