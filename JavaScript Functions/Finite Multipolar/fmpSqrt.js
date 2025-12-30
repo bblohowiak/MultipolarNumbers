@@ -3,7 +3,7 @@ function fmpSqrt(a,b,c,d,e){
 //e is the quantity of signs in the multipolar system > 1
 //some numbers have more than one square root. this function returns only one root per input. a future version might incorporate more rationale (or parameters) for why it returns one root instead of another.
 
-let euclideanModulus=mpModulusEuclidean(a,b,c,d,e);
+let euclideanModulus=fmpModulusEuclidean(a,b,c,d,e);
 var realLikeMag01=0;
 var imLikeMag01=0;
 var realLikeSign01=0;
@@ -17,12 +17,12 @@ var imLikeSign01=0;
 	imLikeMag01=Math.sqrt((euclideanModulus+b)/2);	
 	}
 
-let argumentArray=mpArgument(a,b,c,d,e);
+let argumentArray=fmpArgument(a,b,c,d,e);
     argumentArray[1]=argumentArray[1]/2;
 
 //console.log(argumentArray);
 
-const cosSinArray=mpCosSin(...argumentArray,e);
+const cosSinArray=fmpCosSin(...argumentArray,e);
 	cosSinArray[1]=realLikeMag01;
 	cosSinArray[3]=imLikeMag01;
 
