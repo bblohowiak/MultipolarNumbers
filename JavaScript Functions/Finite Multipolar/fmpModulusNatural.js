@@ -5,7 +5,7 @@ function fmpModulusNatural(a,b,c,d,e){
 const conjProductArray=[];
 let cStar = (c+e)%(2*e);
 
-conjProductArray.push(...mpComplexMultiply(a,b,c,d,a,b,cStar,d,e));
+conjProductArray.push(...fmpComplexMultiply(a,b,c,d,a,b,cStar,d,e));
 
 let realSign = conjProductArray[0];
 let realMag = conjProductArray[1];
