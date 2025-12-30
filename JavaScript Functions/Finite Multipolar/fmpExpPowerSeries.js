@@ -21,7 +21,7 @@ function factorial(n){
 	for (let i=0; i<n-1;i++){
 	
 
-	let quotient=(mpComplexMultiply(...mpNaturalExponent(a,b,c,d,e,(i+2)),0,(1/(factorial(i+2))),0,0,e));
+	let quotient=(fmpComplexMultiply(...fmpNaturalExponent(a,b,c,d,e,(i+2)),0,(1/(factorial(i+2))),0,0,e));
 	
 //console.log("quotient" + i + " :" + quotient);
 	
