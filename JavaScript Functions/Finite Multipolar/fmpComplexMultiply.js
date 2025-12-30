@@ -19,7 +19,7 @@ function fmpComplexMultiply(a,b,c,d,e,f,g,h,i){
 	const consolidArray1=productArray1.concat(...productArray2);
 	consolidArray2.push(...consolidate(...consolidArray1));
 
-mpProduct = consolidArray2;
+fmpProduct = consolidArray2;
 
 return fmpProduct;
 console.log(" " +  "prduct " + fmpProduct);
