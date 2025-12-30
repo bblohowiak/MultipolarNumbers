@@ -12,10 +12,10 @@ function fmpComplexMultiply(a,b,c,d,e,f,g,h,i){
 	let productImMag=0;
 	
 //First, Last...
-	productArray1.push(...mpMultiply(a,b,e,f,i));
-	productArray1.push(...mpMultiply(c,d,e,f,i));
-	productArray2.push(...mpMultiply(c,d,g+2,h,i));
-	productArray2.push(...mpMultiply(a,b,g,h,i));
+	productArray1.push(...fmpMultiply(a,b,e,f,i));
+	productArray1.push(...fmpMultiply(c,d,e,f,i));
+	productArray2.push(...fmpMultiply(c,d,g+2,h,i));
+	productArray2.push(...fmpMultiply(a,b,g,h,i));
 	const consolidArray1=productArray1.concat(...productArray2);
 	consolidArray2.push(...consolidate(...consolidArray1));
 
