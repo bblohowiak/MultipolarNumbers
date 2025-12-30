@@ -39,7 +39,7 @@ for  (let i = 0; i < f-1; i++){
 	let imSign01=imSign[i];
 	let imMag01=imMag[i];
 	
-	productArray.push(...mpComplexMultiply(a,b,c,d,realSign01,realMag01,imSign01,imMag01,e));
+	productArray.push(...fmpComplexMultiply(a,b,c,d,realSign01,realMag01,imSign01,imMag01,e));
 	
 	realSign.push(productArray[(i*4)]);
 	realMag.push(productArray[(i*4)+1]);
