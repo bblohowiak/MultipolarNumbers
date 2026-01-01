@@ -50,7 +50,7 @@ const cosSinArray=fmpCosSin(...argumentArray,e);
 				var aPrime=((a+e)%(e*2))/2;			
 }
 
-		var cPrime=(c-aPrime)%(2*e)
+		var cPrime=(((c-aPrime)%(2*e))+(2*e))%(2*e);
 		cosSinArray[0]=aPrime;
 		cosSinArray[2]=cPrime;
 	
