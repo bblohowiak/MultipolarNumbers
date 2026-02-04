@@ -14,7 +14,7 @@ for  (let i = 0; i < f+1 && tooBig <=escapeMagnitude; i++){
 	
 	zRealSign=newZArray[(i*4)];
 	zRealMag=newZArray[(i*4)+1];
-	zImSign=((newZArray[(i*4)+2])+6)%12;		
+	zImSign=((newZArray[(i*4)+2])+g)%(g*2);		
 	zImMag=newZArray[(i*4)+3];
 	
 	if (modulus == 0){
