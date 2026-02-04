@@ -12,9 +12,9 @@ function fmpTricornSC(a,b,c,d,e,f,g){
 	
 for  (let i = 0; i < f+1 && tooBig <=escapeMagnitude; i++){
 	
-	zRealSign=((newZArray[(i*4)+2])+2)%12;
+	zRealSign=((newZArray[(i*4)+2])+2)%(g*2);
 	zRealMag=newZArray[(i*4)+3];
-	zImSign=((newZArray[(i*4)])+6)%12;		
+	zImSign=((newZArray[(i*4)])+g)%(g*2);		
 	zImMag=newZArray[(i*4)+1];
 	
 	if (modulus == 0){
