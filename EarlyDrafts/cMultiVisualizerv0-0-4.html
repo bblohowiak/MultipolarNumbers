@@ -29,7 +29,7 @@ v0.0.1 - First version
 v0.0.2 - Added glitch mode, safe/accurate mode toggle.
 v0.0.3 - Generalized hexapolarity to any quantity of signs.
 v0.0.4 - Updated:
-			- output filename to include sign quantity parameter
+			- output filename to include sign quantity parameter and QIII signs
 			- range of accepted inputs for axes signs
 			- user-specifiable quadrants with default "lock mode" that weds I & II and III & IV by imaginary sign and weds I&IV and II&III by reallike sign.  
 -->
@@ -396,10 +396,10 @@ if (whichFractal==3){var fractalLabel="Tricorn";}
 if (whichFractal==2){var fractalLabel="MandelbrotS";}
 if (whichFractal==6){var fractalLabel="TricornCS";}
 if (whichFractal==7){var fractalLabel="TricornSC";}
-if (whichFractal==10){var fractalLabel="splitMandelbrot"; realSign="pltCm"; imSign="pltCm";}
-if (whichFractal==11){var fractalLabel="splitTricorn"; realSign="pltCm"; imSign="pltCm";}
+if (whichFractal==10){var fractalLabel="splitMandelbrot"; realSign="pltCm"; imSign="pltCm"; realSignIII=-1; imSignIII=-1;}
+if (whichFractal==11){var fractalLabel="splitTricorn"; realSign="pltCm"; imSign="pltCm"; realSignIII=-1; imSignIII=-1;}
 
-	let filename = "cMulti"+fractGlitch+" "+signQuant+"signs"+" s"+realSign+"s"+imSign+" "+" s"+realSignIII+"s"+imSignIII+" "+fractalLabel+" "+exponent+"  x"+upperLeftX+" y"+upperLeftY+" itr"+maxIterations+" mode"+colorMode+" mod"+mode2ModuloIterationSelectionParameter/.0157+" "+" zm"+zoomIndex;
+	let filename = "cMulti"+fractGlitch+" "+signQuant+"signs"+" I s"+realSign+"s"+imSign+" "+"III s"+realSignIII+"s"+imSignIII+" "+fractalLabel+" "+exponent+"  x"+upperLeftX+" y"+upperLeftY+" itr"+maxIterations+" mode"+colorMode+" mod"+mode2ModuloIterationSelectionParameter/.0157+" "+" zm"+zoomIndex;
 
             output = "<canvas id='myCanvas' width="+(canvasSize-1)+" height="+(canvasSize-1)+" style='border:1px solid grey'></canvas><br><a id='download' download='"+filename+".jpg' href='' onclick='download_img(this);'>Download this image named with its parameters</a>";
             
