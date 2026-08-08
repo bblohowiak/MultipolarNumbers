@@ -1,0 +1,1373 @@
+
+<!DOCTYPE html>
+<html lang="en">
+    <meta charset="UTF-8">
+
+<title>Finite Multipolar Calculator</title>
+
+<style>
+h1 {
+  font-family: "Courier New", Courier, monospace;
+}
+body {  background-color: white;
+  color: black;
+    font-family: "Courier New", Courier, monospace;
+  }
+  canvas {  background-color: white;
+  color: white;}
+  th, td {
+  padding: 7px;
+    border: 1px solid black;
+  border-collapse: collapse;
+}
+</style>
+<body>
+    <p id="demo"></p>
+    <div id="result01"></div>
+  <script>
+        
+        //begin function declarations
+
+function consolidate(a,b,c,d,e,f,g,h){
+//a,c,e,g must be 0 if mod2, i.e. even or 0
+//a,c must be even or 0, twice the sign index (e.g., identity=0, sequitive=2, trinitive=4, quadritive=6, etc.). 
+	const consolidArray=[];
+	let realSign=0;
+	let imSign=0;
+	let realMag=0;
+	let imMag=0;
+
+	if (a==e){
+		realMag=b+f;
+	} else {
+		realMag=Math.abs(b-f);
+}
+
+	if (c==g){
+		imMag=d+h;
+	} else {
+		imMag=Math.abs(d-h);
+}
+
+	if (a==e && (b+f) != 0){
+	realSign=a;	
+	}
+	
+	if(b>f){
+	realSign=a;
+} 	
+
+	if (f>b){
+	realSign=e;
+} 	
+
+	if (b+f==0){
+	realSign=0;	
+}
+
+	if (c==g && (d+h) != 0){
+	imSign=c;	
+	}
+	
+	if(d>h){
+	imSign=c;
+} 	
+
+	if (h>d){
+	imSign=g;
+} 	
+
+	if (d+h==0){
+	imSign=0;	
+}
+
+	consolidArray.push(realSign,realMag,imSign,imMag);
+
+consolid=consolidArray;
+
+return consolid;
+}	
+
+function fmpMultiply(a,b,c,d,e){
+//a,c must be even or 0, twice the sign index (e.g., identity=0, sequitive=2, trinitive=4, quadritive=6, etc.). e is the quantity of signs of the multipolar system.
+	const productArray=[];
+	let realSign1=0;
+	let realSign2=0;
+	let realMag1=0;
+	let realMag2=0;
+	let productMag=0;
+	let productSign=0;
+
+	if (b == 0 || d==0){
+	productSign=0;
+	} else {
+	productSign=(a+c)%(2*e);
+	}
+
+	productMag=b*d;
+
+	productArray.push(productSign,productMag);
+
+Product = productArray;
+
+return Product;
+}	
+        
+function fmpComplexMultiply(a,b,c,d,e,f,g,h,i){
+//a,c,e,g must be 0 if mod2, i.e. even or 0
+//i is the quantity of signs in the multipolar system
+	const productArray=[];
+	const productArray1=[];
+	const productArray2=[];
+	const consolidArray2=[];
+	const productArray3=[];
+	let productRealSign=0;
+	let productImSign=0;
+	let productRealMag=0;
+	let productImMag=0;
+	
+//First, Last...
+	productArray1.push(...fmpMultiply(a,b,e,f,i));
+	productArray1.push(...fmpMultiply(c,d,e,f,i));
+	productArray2.push(...fmpMultiply(c,d,g+2,h,i));
+	productArray2.push(...fmpMultiply(a,b,g,h,i));
+	const consolidArray1=productArray1.concat(...productArray2);
+	consolidArray2.push(...consolidate(...consolidArray1));
+
+fmpProduct = consolidArray2;
+
+return fmpProduct;
+//console.log(" " +  "prduct " + fmpProduct);
+}	
+
+function fmpConjugate(a,b,c,d,e){
+//a,c must be even or 0
+//e is the quantity of signs in the multipolar system
+	let newImSign=(c+e)%(2*e);
+	const outputArray=[a,b,newImSign,d];
+	
+return outputArray;
+}
+
+function fmpModulusNatural(a,b,c,d,e){
+//a,c must be even or 0
+//e is the quantity of signs in the multipolar system > 1
+//[these moduli will have signs such that signvalue%4=0 and so the square root is the real-like component magnitude sqrt signed by signvalue/2.]
+const conjProductArray=[];
+let cStar = (c+e)%(2*e);
+
+conjProductArray.push(...fmpComplexMultiply(a,b,c,d,a,b,cStar,d,e));
+
+let realSign = conjProductArray[0];
+let realMag = conjProductArray[1];
+console.log(" " +  " " + realSign + conjProductArray[0]);
+realSign = realSign/2;
+realMag = Math.sqrt(realMag);
+console.log(" " +  " " + realSign);
+conjProductArray[0]=realSign;
+conjProductArray[1]=realMag;
+
+const sqrtArray=conjProductArray;
+
+
+//returns an array containing a sign, real-like magnitude, and two zeros.
+return sqrtArray;
+
+}
+
+function fmpModulusEuclidean(a,b,c,d,e){
+//e is the quantity of signs in the multipolar system > 1
+	let euclideanInterval=Math.sqrt((b**2)+(d**2));
+//returns a Real number >=0
+return euclideanInterval;
+
+}
+
+function fmpNaturalExponent(a,b,c,d,e,f){
+//a,c must be even or 0
+//e is the quantity of signs in the multipolar system > 1
+////f is exponent, must be positive integer or zero. a,c are signs expressed as even exponents of s. b, d are magnitudes.
+
+	const realSign=[a];
+	const realMag=[b];
+	const imSign=[c];
+	const imMag=[d];
+	const productArray=[];
+	const factorArray=[];
+	const Product=[];
+
+//IF F==0, IF F==1...
+
+	if (f==0){
+	
+		let outputSign=0;
+		let outputMag=1;
+		let outputSign2=0;
+		let outputMag2=0;
+		Product.push(outputSign,outputMag,outputSign2,outputMag2);
+}
+
+	if (f==1){
+	
+		let outputSign=a;
+		let outputMag=b;
+		let outputSign2=c;
+		let outputMag2=d;
+		Product.push(outputSign,outputMag,outputSign2,outputMag2);
+}
+
+	if (f>1){
+for  (let i = 0; i < f-1; i++){
+	
+	let realSign01=realSign[i];
+	let realMag01=realMag[i];
+	let imSign01=imSign[i];
+	let imMag01=imMag[i];
+	
+	productArray.push(...fmpComplexMultiply(a,b,c,d,realSign01,realMag01,imSign01,imMag01,e));
+	
+	realSign.push(productArray[(i*4)]);
+	realMag.push(productArray[(i*4)+1]);
+	imSign.push(productArray[(i*4)+2]);
+	imMag.push(productArray[(i*4)+3]);
+
+}
+
+	arrayLength=productArray.length;
+	
+	
+	let outputSign=productArray[arrayLength-4];
+	let outputMag=productArray[arrayLength-3];
+	let outputSign2=productArray[arrayLength-2];
+	let outputMag2=productArray[arrayLength-1];
+Product.push(outputSign,outputMag,outputSign2,outputMag2);
+}
+//console.log("Product:" + Product);
+return Product;
+}	
+
+function fmpExpPowerSeries(a,b,c,d,e,n){
+//e is the quantity of signs in the multipolar system > 1
+//quotient zeroes out if n>170
+//if n=170, magnitude of argument too large if ~21pi
+//plan to explore BIGINT as possible remedy
+//(0,1,17) yields a good approximation of e; (6,1,17) yields a good approximation of its multiplicative inverse.
+//multipolar units not in the complex plane converge to values other than e^-1 depending on whether their roots are real-like or imaginary-like.
+//exp(s1.57)-> orthant that a signed s under repeat self-multiplication bypasses
+
+
+function factorial(n){
+    if (n == 0)
+        return 1;
+    return n * factorial(n - 1);
+
+
+}
+
+	let consolid=consolidate(0,1,0,0,a,b,c,d);
+
+	for (let i=0; i<n-1;i++){
+	
+
+	let quotient=(fmpComplexMultiply(...fmpNaturalExponent(a,b,c,d,e,(i+2)),0,(1/(factorial(i+2))),0,0,e));
+	
+//console.log("quotient" + i + " :" + quotient);
+	
+	consolid=consolidate(...consolid,...quotient);
+	
+	let newSum=consolid;
+
+	}
+
+	let output=consolid;
+return output;	
+
+}
+
+function fmpMultiplicativeInverse(a,b,c,d,e){
+//a,c must be even or 0
+//e is the quantity of signs in the multipolar system > 1
+//complex multipolar multiplicative inverses are not necessarily unique; for powers of s, the cycles of exponentiation (e.g., s^pi/4, (s^5)^pi/4) contain multiplicative inverses for numbers contained in that cycle and their scalings. this function can compute multiplicative inverses across cycles of exponentiation except for the embedded conventional complex case due to its special properties (not some implementation cop-out). 
+	const inverseArray =[0,0,0,0,e];
+	const aArray01 =[a,b,0,0,e];
+	const bArray01 =[c,d,0,0,e];
+	const cArray01 =[0,0,0,0,e];
+	const dArray01 =[];
+	const dOverCArray=[e,d/b,0,0,e];
+	const productArray01=[];
+	const consolidArray01=[];
+	
+//aArray can't be denominator
+	if (b==0 && d!=0){
+//if a is 0, sequitive bd=1
+//magnitude of d = 1/|b|
+	dArray01[1]=1/bArray01[1];
+//sign of d = 1/sequitive b
+	dArray01[0]=(e*2)-(c+2)%(e*2);
+
+	inverseArray[2]=dArray01[0];
+	inverseArray[3]=dArray01[1];
+	}
+	
+	
+//bArray can't be denominator
+	if (d==0 && b!=0){
+//if b is 0, ac=1
+//magnitude of c = 1/|a|
+	cArray01[1]=1/aArray01[1];
+//sign of c = 1/a
+	cArray01[0]=(e*2)-(a)%(e*2);
+
+	inverseArray[0]=cArray01[0];
+	inverseArray[1]=cArray01[1];
+	}	
+	
+	
+	if (d !=0 && b!=0){
+	
+//if input magnitudes are unequal...
+		if (b!=d){
+//d/c*sequitive b
+productArray01.push(...fmpComplexMultiply((bArray01[0]+2)%(e*2),bArray01[1],bArray01[2],bArray01[3],...dOverCArray));
+
+//a + product array
+consolidArray01.push(...consolidate(aArray01[0],aArray01[1],aArray01[2],aArray01[3],productArray01[0],productArray01[1],productArray01[2],productArray01[3]));
+
+//multiplicative inverse of consolid array to c
+	cArray01[0]=((e*2)-consolidArray01[0])%(e*2);
+	cArray01[1]=1/consolidArray01[1];
+
+//c*(d/c) to d
+dArray01.push(...fmpComplexMultiply(cArray01[0],cArray01[1],cArray01[2],cArray01[3],...dOverCArray));
+dArray01[4]=e;
+console.log(dArray01);
+
+	inverseArray[0] = cArray01[0];
+	inverseArray[1] = cArray01[1];
+	inverseArray[2] = dArray01[0];
+	inverseArray[3] = dArray01[1];
+}else{
+//if input magnitudes are equal then c,d magnitudes are equal to each other
+//a*c=.5 and sequitive*b*d=.5		
+//c=1/2a
+	cArray01[0]=((e*2)-aArray01[0])%(2*e);
+	cArray01[1]=1/(aArray01[1]*2);
+
+//d=1/2*b*sequitive
+	dArray01[0]=((e*2)-(bArray01[0]+2))%(2*e);
+	dArray01[1]=1/(bArray01[1]*2);
+
+//console.log("barray"+bArray01);
+//console.log("darray"+dArray01);
+	inverseArray[0] = cArray01[0];
+	inverseArray[1] = cArray01[1];
+	inverseArray[2] = dArray01[0];
+	inverseArray[3] = dArray01[1];
+			
+		}
+}
+		
+	
+	if (b==d && b==0){
+	
+	inverseArray=[];
+	console.log("Undefined: Zero has no multiplicative inverse.");
+	}
+	
+ return inverseArray;
+
+} 
+
+function fmpForwardDivision(a,b,c,d,e,f,g,h,i){
+//accepts two complex numbers a,b,c,d by e,f,g,h and returns an array
+//a,c,e,g must be even or 0
+//i is the quantity of signs in the multipolar system > 1
+//"forward division" defined herein as multiplication of a "dividend" (a,b,c,d) with a multiplicative inverse of its "divisor (e,f,g,h)."
+//because multiplying can produce a zero quotient, as in some cases of conjugates, this "division" can also produce a zero quotient.
+	const quotientArray=[];
+quotientArray.push(...fmpComplexMultiply(a,b,c,d,...fmpMultiplicativeInverse(e,f,g,h,i),i))
+return quotientArray;
+}
+
+function fmpExponentiationCycle(a,b,c,d,e){
+//a,c must be even or 0
+//e is the quantity of signs in the multipolar system > 1
+
+//is this number in an orthant with a cycle of exponentiation? [check a,c ordered pair]
+//list the orthants associated with each cycle of natural exponentiation or lack thereof for e.	
+//for a multipolar number system with e signs, there are e/2 cycles of imaginary unit exponentiation.the "middle" one is isomorphic to the conventional complex plane.
+
+//for loops...(e-(e-1)) is the first natural exponent of s, cycle 1. it will contain e*2 orthants unless the cycle is for base s^(e/2), in which case it will only have four.
+//to get the other cycles, keep adding two to e-(e-1) and don't go past e-1. 
+
+//keys will be all possible ac values given e and then get for key ac the value that encodes exponentiation cycle index and orthant index.
+
+
+const map01 = new Map([
+  ["a", 2+"-"+3],
+  ["b", 7300],
+  ["c", 2700]
+]);
+
+	for (let i=0; i<(e/2);i++){
+		for (let j=0; j<(e*2)+1;j++){
+
+//if j==0, if j%2==0 && j!=0, if j%2!=0
+
+	if (j==0){
+	map01.set(0+"-"+0, 1+"-"+1);	
+	
+}
+	
+	if (j%2==0 && j!=0){
+		const product1=fmpNaturalExponent(0,0,(i*2),1,e,j);
+		const product2=fmpNaturalExponent(0,0,(i*2),1,e,(j-1));
+		let realProductSign = product1[0];
+		let imaginaryProductSign = product2[2];
+//console.log(i +"j"+ j+"realProductSign"+realProductSign+" "+imaginaryProductSign);
+map01.set(realProductSign+"-"+imaginaryProductSign, ((i*2)+1)+"-"+j);
+	
+	
+	if (i==((e/2)-2) && j>3){
+	j=(e*2);
+}
+}
+
+
+	if (j%2!=0){
+		const product1=fmpNaturalExponent(0,0,(i*2),1,e,(j-1));
+		const product2=fmpNaturalExponent(0,0,(i*2),1,e,j);
+		let realProductSign = product1[0];
+		let imaginaryProductSign = product2[2];
+//console.log(i +"j"+ j+"realProductSign"+realProductSign+" "+imaginaryProductSign);
+map01.set(realProductSign+"-"+imaginaryProductSign, ((i*2)+1)+"-"+j);
+
+	if (i==((e/2)-2) && j>3){
+	j=(e*2);
+}
+
+
+}
+
+}
+}
+
+const numb = map01.get(a+"-"+c);
+//console.log(numb);
+//document.getElementById("demo").innerHTML = "There are " + numb + " apples.";
+
+if (numb != undefined){
+//write a thing that parses numb for the cycleIndexArray
+const cycleIndexArray = numb.split('-');
+cycleIndexArray[0]=Number(cycleIndexArray[0]);
+cycleIndexArray[1]=Number(cycleIndexArray[1]);
+return cycleIndexArray;
+} else {
+const cycleIndexArray = [0,0];
+return cycleIndexArray;
+}
+//each orthant identified by cycle of exponentiation index with 0==none, 1==s, 3=s^3, etc.
+//complex plane identified with s^(e/2)
+//each orthant identified by position in cycle sequence with 1==0,0, 2==2,0, etc. 0==none
+//output is a two-element array with cycle number and orthant position e.g., 0, 0
+
+}
+
+function fmpArgument(a,b,c,d,e){
+//a,c must be even or 0
+//e is the quantity of signs in the multipolar system > 1
+//if b or d is zero this function defaults to the s^1 cycle.
+//output [cycle of exponentiation, argument (angle) magnitude in radians]
+
+	if (b==0){
+		a=c;
+}
+
+	if (d==0){
+		c=a;
+}
+
+
+	const exponentiationCycle = fmpExponentiationCycle(a,b,c,d,e);
+
+	if (exponentiationCycle[0] != 0){
+
+		let countOfTraversedOrthants=(exponentiationCycle[1]-1);
+			if (countOfTraversedOrthants == -1){
+			countOfTraversedOrthants = 0;	}	
+		
+		
+			let tail = countOfTraversedOrthants*Math.PI/2;
+//console.log(tail);
+
+			if (exponentiationCycle[1]%2==1){
+				var nose=Math.atan2(d, b);
+//console.log("nose"+nose);				
+} else {
+				var nose=Math.atan2(d, -b)-(Math.PI/2);
+//console.log("nose"+nose);		
+}
+
+	const argumentArray=[exponentiationCycle[0], tail+nose];	
+	return argumentArray;
+		
+}
+
+	if (exponentiationCycle[0] == 0){
+		const argumentArray=[0, 0];	
+		return argumentArray;
+	}
+}
+
+function fmpCosSin(a,b,e){
+//a is the cycle of exponentiation
+//b is the argument
+//e is the quantity of signs in the multipolar system > 1
+//outputs 0 for orthants that a signed s under repeat self-multiplication bypasses
+
+
+	let argumentNose=b%Math.PI;
+	let csRealMag=Math.abs(Math.cos(argumentNose));
+	let csImMag=Math.sin(argumentNose);
+	let orthantCount=((Math.floor(b/(Math.PI/2)))%(e*2))+1;
+
+
+const map01 = new Map([
+  ["a", 2+"-"+3],
+  ["b", 430],
+  ["c", 24]
+]);
+
+	for (let i=0; i<(e/2);i++){
+		for (let j=0; j<(e*2)+1;j++){
+
+//if j==0, if j%2==0 && j!=0, if j%2!=0
+
+	if (j==0){
+	map01.set(0+"-"+0, 1+"-"+1);	
+	
+}
+	
+	if (j%2==0 && j!=0){
+		const product1=fmpNaturalExponent(0,0,(i*2),1,e,j);
+		const product2=fmpNaturalExponent(0,0,(i*2),1,e,(j-1));
+		let realProductSign = product1[0];
+		let imaginaryProductSign = product2[2];
+//console.log(i +"j"+ j+"realProductSign"+realProductSign+" "+imaginaryProductSign);
+map01.set(((i*2)+1)+"-"+j, realProductSign+"-"+imaginaryProductSign);
+	
+	
+	if (i==((e/2)-2) && j>3){
+	j=(e*2);
+}
+}
+
+
+	if (j%2!=0){
+		const product1=fmpNaturalExponent(0,0,(i*2),1,e,(j-1));
+		const product2=fmpNaturalExponent(0,0,(i*2),1,e,j);
+		let realProductSign = product1[0];
+		let imaginaryProductSign = product2[2];
+//console.log(i +"j"+ j+"realProductSign"+realProductSign+" "+imaginaryProductSign);
+map01.set(((i*2)+1)+"-"+j, realProductSign+"-"+imaginaryProductSign);
+
+	if (i==((e/2)-2) && j>3){
+	j=(e*2);
+}
+
+
+}
+
+}
+}
+
+const numb = map01.get(a+"-"+orthantCount);
+//console.log(numb);
+//document.getElementById("demo").innerHTML = "There are " + numb + " apples.";
+
+
+	if (numb != undefined){
+//write a thing that parses numb 
+		const signsArray = numb.split('-');
+		signsArray[0]=Number(signsArray[0]);
+		signsArray[1]=Number(signsArray[1]);
+
+		if (csRealMag==0){
+		var csRealSign=0;
+} else {
+		var csRealSign=signsArray[0];
+
+}
+	
+	if (csImMag==0){
+		var csImSign=0;
+} else {
+		var csImSign=signsArray[1];		
+}
+
+
+
+		const sinCosArray=[csRealSign,csRealMag,csImSign,csImMag];
+		return sinCosArray;
+} else {
+const signsArray = [0,0];
+const sinCosArray=[signsArray[0],0,signsArray[1],0];
+return sinCosArray;
+}
+
+}
+
+function fmpSqrt(a,b,c,d,e){
+//a,c must be even or 0
+//e is the quantity of signs in the multipolar system > 1
+//some numbers have more than one square root. this function returns only one root per input. a future version might incorporate more rationale (or parameters) for why it returns one root instead of another.
+
+let euclideanModulus=fmpModulusEuclidean(a,b,c,d,e);
+var realLikeMag01=0;
+var imLikeMag01=0;
+var realLikeSign01=0;
+var imLikeSign01=0;
+
+	if (a%4 == 0){
+	realLikeMag01=Math.sqrt((euclideanModulus+b)/2);	
+	imLikeMag01=Math.sqrt((euclideanModulus-b)/2);	
+	} else {
+	realLikeMag01=Math.sqrt((euclideanModulus-b)/2);	
+	imLikeMag01=Math.sqrt((euclideanModulus+b)/2);	
+	}
+
+let argumentArray=fmpArgument(a,b,c,d,e);
+    argumentArray[1]=argumentArray[1]/2;
+
+//console.log(argumentArray);
+
+const cosSinArray=fmpCosSin(...argumentArray,e);
+	cosSinArray[1]=realLikeMag01;
+	cosSinArray[3]=imLikeMag01;
+
+
+	if (argumentArray[0]==0 && argumentArray[1]==0){
+	
+//real signs will be 2*index except for e/2
+//for a given real sign x, there will be an imaginary sign x+((e/2)-1)%(e*2) 	
+//for a given real sign x, there will be an imaginary sign (x+e)+((e/2)-1)%(e*2) 
+//for a given real sign x, there will also be a real sign x+e
+
+//the real signs x or x+e will have the same sqrt real sign
+//that sqrt real sign will be x/2 if x/2%2==0
+//else if ((x+e)%(e*2))/2%2==0 
+	
+//you will have a&c. given a%2, the sign a' is either a/2 or ((a+e)%(e*2))/2
+//c' depends on c; for a given a, c' advances by a difference of e offset by the sign associated with i for the system ((e/2)-1))...decapolar,4 or 14 
+//does c==a'+4 or a'+14? that should give you c'
+//c-a'%(2*e)==c'
+
+		let aTest=(a/2)%2;
+			if (aTest==0){
+				var aPrime=a/2;
+} else {
+				var aPrime=((a+e)%(e*2))/2;			
+}
+
+		var cPrime=(((c-aPrime)%(2*e))+(2*e))%(2*e);
+		cosSinArray[0]=aPrime;
+		cosSinArray[2]=cPrime;
+	
+	
+	}
+
+	if (cosSinArray[1]==0){cosSinArray[0]=0;}
+	if (cosSinArray[3]==0){cosSinArray[2]=0;}
+
+return cosSinArray;
+
+
+}
+
+
+        //end function declarations
+//	for (let i=0; i<143; i++){
+
+
+//console.log(" " +  " " + i, fmpExpPowerSeries(0,0,0,1*((10*Math.PI/140)*i),6,170));
+//console.log(" " +  " " + i, fmpExpPowerSeries(6,1,0,0,6,17));
+//}
+        
+//console.log(" " +  "Modulus Natural:" + fmpModulusNatural(4,2,0,2,6,17));             
+//console.log(" " +  "Power Series:" + fmpExpPowerSeries(0,0,2,Math.PI,6,200));     
+//console.log(" " +  "Power Series:" + fmpExpPowerSeries(0,0,2,Math.PI*3,6,17));  
+//console.log(" " +  "Power Series:" + fmpExpPowerSeries(0,0,2,Math.PI*3,6,170));  
+//console.log(" " +  "Power Series:" + fmpExpPowerSeries(0,0,2,Math.PI*6,6,170));  
+//console.log(" " +  "Power Series:" + fmpExpPowerSeries(0,0,2,Math.PI*10,6,170));  
+        //as theta increases in magnitude, greater n is required to "reign in" the initial quotient addends
+//NaN failure at argument ~36 and n of 200.
+//NaN failure at argument ~54 and n of 176
+//argument ~33 and n of 176 the approximation slips, and then >33 exponential slip.
+//plan to explore BIGINT as possible remedy
+
+//console.log(fmpForwardDivision(0,25,0,0,6,5,0,0,6));
+//console.log("MI"+fmpMultiplicativeInverse(8,.5,4,.5,6));
+//console.log(fmpComplexMultiply(6,.71,4,.71,6,.70422,6,.70422,6));
+//console.log(fmpComplexMultiply(0,1,0,1,6,1,0,1,6));
+//console.log("NaturalExponent"+fmpNaturalExponent(0,2,0,3,6,2));
+//console.log(fmpArgument(8,1,10,1,6));
+//console.log("Sqrt"+fmpSqrt(4,.4,6,.8,6));
+//console.log(fmpNaturalExponent(2, 5.5723027555148466, 10, 6.544039299028138,6,2));
+//console.log(fmpNaturalExponent(2, .71, 10, 2.71, 6,2));
+//console.log(fmpNaturalExponent(2, 3, 6, 5, 10,2));
+//console.log(fmpNaturalExponent(2, 3, 16, 5, 10,2));
+//console.log(fmpNaturalExponent(2, 5, 6, 3, 10,2));
+//console.log(fmpNaturalExponent(2,0.8044958641907105,4,0.4972057878785785, 6,2));
+
+//console.log(" " +  "Power Series:" + fmpExpPowerSeries(0,0,0,Math.PI*11,6,200));  
+
+	function sampleExpCurve(rangeMax,sampleQuant,signQuant,sSign){
+//at what theta does the function stop
+//how many samples of the function range are returned?
+//what is the sign quantity?
+//what is the sign of the imaginary-like s unit?
+	
+		let outputArray=[];
+
+		for (let i=0; i<rangeMax; i+=rangeMax/sampleQuant){
+			let tempArray=[];
+			let tempArray02=[];		
+			tempArray.push(signQuant,i,...fmpExpPowerSeries(0,0,sSign,i,signQuant,200));
+			tempArray02.push(signQuant,i+.00025,...fmpExpPowerSeries(0,0,sSign,i,signQuant,200));
+//		outputArray.push(i,fmpExpPowerSeries(0,0,sSign,i,signQuant,200));	
+			outputArray.push(tempArray, tempArray02);	
+		}
+		
+		
+	
+
+		console.log(outputArray);
+		return outputArray; 
+//close function
+	}
+
+//	sampleExpCurve(34.8,69113,6,0);
+
+	var curveArray=[];
+	var theta=(Math.PI/32)*355;
+//	curveArray=sampleExpCurve(34.8,10000,6,0);
+	curveArray=sampleExpCurve(theta,6000,6,0);	
+	//powerSeries implementation craps out for theta>34.8 w/200 terms.
+
+			document.getElementById("result01").innerHTML=curveArray;
+
+
+
+ 
+//Graphing STUFF BELOW_________-----------------
+
+    </script>
+
+  <canvas id="canvasMerged" width="500" height="500">
+  An alternative text describing what your canvas displays.
+</canvas>  
+    
+  <canvas id="canvasI" width="500" height="500">
+  An alternative text describing what your canvas displays.
+</canvas>  
+  <canvas id="canvasII" width="500" height="500">
+  An alternative text describing what your canvas displays.
+</canvas>  
+  <canvas id="canvasIII" width="500" height="500">
+  An alternative text describing what your canvas displays.
+</canvas>  
+<br>
+  <canvas id="canvasIV" width="500" height="500">
+  An alternative text describing what your canvas displays.
+</canvas>  
+  <canvas id="canvasV" width="500" height="500">
+  An alternative text describing what your canvas displays.
+</canvas>  
+  <canvas id="canvasVI" width="500" height="500">
+  An alternative text describing what your canvas displays.
+</canvas> 
+<br> 
+  <canvas id="canvasVII" width="500" height="500">
+  An alternative text describing what your canvas displays.
+</canvas>  
+  <canvas id="canvasVIII" width="500" height="500">
+  An alternative text describing what your canvas displays.
+</canvas>  
+  <canvas id="canvasIX" width="500" height="500">
+  An alternative text describing what your canvas displays.
+</canvas>  
+<script>
+	var canvasI = document.getElementById("canvasI");
+var ctxI = canvasI.getContext("2d");
+ctxI.fillStyle = "black";
+
+	var canvasII = document.getElementById("canvasII");
+var ctxII = canvasII.getContext("2d");
+
+	var canvasIII = document.getElementById("canvasIII");
+var ctxIII = canvasIII.getContext("2d");
+
+	var canvasIV = document.getElementById("canvasIV");
+var ctxIV = canvasIV.getContext("2d");
+
+	var canvasV = document.getElementById("canvasV");
+var ctxV = canvasV.getContext("2d");
+
+	var canvasVI = document.getElementById("canvasVI");
+var ctxVI = canvasVI.getContext("2d");
+
+	var canvasVII = document.getElementById("canvasVII");
+var ctxVII = canvasVII.getContext("2d");
+
+	var canvasVIII = document.getElementById("canvasVIII");
+var ctxVIII = canvasVIII.getContext("2d");
+
+	var canvasIX = document.getElementById("canvasIX");
+var ctxIX = canvasIX.getContext("2d");
+
+
+// Add a rectangle at (10, 10) with size 100x100 pixels
+
+
+	function fourQuadrantCanvas(whichCanvas,width,x,y){
+	
+		x=x+(width/2);
+		y=(y*-1)+(width/2);
+		
+		if (whichCanvas=="I"){
+		ctxI.fillRect(x,y,2,2);
+		}
+		if (whichCanvas=="II"){
+		ctxII.fillRect(x,y,2,2);
+		}
+		if (whichCanvas=="III"){
+		ctxIII.fillRect(x,y,2,2);
+		}
+		if (whichCanvas=="IV"){
+		ctxIV.fillRect(x,y,2,2);
+		}
+		if (whichCanvas=="V"){
+		ctxV.fillRect(x,y,2,2);
+		}
+		if (whichCanvas=="VI"){
+		ctxVI.fillRect(x,y,2,2);
+		}
+		if (whichCanvas=="VII"){
+		ctxVII.fillRect(x,y,2,2);
+		}
+		if (whichCanvas=="VIII"){
+		ctxVIII.fillRect(x,y,2,2);
+		}
+		if (whichCanvas=="IX"){
+		ctxIX.fillRect(x,y,2,2);
+		}															
+	}
+
+//	var colorBy="orthant";
+	var colorBy="independentVariable";
+	function curveToQuadCanvas(width,variableArray){
+	
+		for (let i=0; i<variableArray.length; i+=1){
+			let tempArray01=[];
+			tempArray01.push(variableArray[i][2],variableArray[i][3],variableArray[i][4],variableArray[i][5],variableArray[i][1]);
+			
+			let x=0;
+			let y=0;
+
+				ctxI.font = "48px serif";
+				ctxI.fillText("theta: "+theta,0,50);
+
+//canvasI Quad I			
+			if (tempArray01[0]==4 && tempArray01[2]==8){
+				x=tempArray01[1]*(width/2);
+				y=tempArray01[3]*(width/2);
+				console.log(tempArray01);
+				if (colorBy=="orthant"){
+				ctxI.fillStyle = "black";}
+				if (colorBy=="independentVariable"){
+				ctxI.fillStyle = "rgb("+(tempArray01[4]*6.7)+",0,0)";}	
+//console.log(tempArray01[4]*6);					
+				fourQuadrantCanvas("I",width,x,y);
+			}	
+
+//canvas I Quad II							
+			if (tempArray01[0]==10 && tempArray01[2]==8){
+				x=(tempArray01[1]*(width/2))*-1;
+				y=tempArray01[3]*(width/2);
+				if (colorBy=="orthant"){				
+				ctxI.fillStyle = "red";}
+				if (colorBy=="independentVariable"){
+				ctxI.fillStyle = "rgb("+(tempArray01[4]*6.7)+",0,0)";}
+				fourQuadrantCanvas("I",width,x,y);				
+			}	
+			
+//canvas I Quad III			
+			if (tempArray01[0]==10 && tempArray01[2]==2){
+				x=(tempArray01[1]*(width/2))*-1;
+				y=(tempArray01[3]*(width/2))*-1;
+				if (colorBy=="orthant"){				
+				ctxI.fillStyle = "orange";}
+				if (colorBy=="independentVariable"){
+				ctxI.fillStyle = "rgb("+(tempArray01[4]*6.7)+",0,0)";}
+				fourQuadrantCanvas("I",width,x,y);
+			}	
+
+//canvas I Quad IV
+			if (tempArray01[0]==4 && tempArray01[2]==2){
+				x=tempArray01[1]*(width/2);
+				y=(tempArray01[3]*(width/2))*-1;
+				if (colorBy=="orthant"){				
+				ctxI.fillStyle = "purple";}
+				if (colorBy=="independentVariable"){
+				ctxI.fillStyle = "rgb("+(tempArray01[4]*6.7)+",0,0)";}
+				fourQuadrantCanvas("I",width,x,y);
+			}
+			
+//canvasII Quad I			
+			if (tempArray01[0]==4 && tempArray01[2]==6){
+				x=tempArray01[1]*(width/2);
+				y=tempArray01[3]*(width/2);
+				console.log(tempArray01);
+				if (colorBy=="orthant"){
+				ctxII.fillStyle = "black";}
+				if (colorBy=="independentVariable"){
+				ctxII.fillStyle = "rgb("+(tempArray01[4]*6.7)+",0,0)";}	
+//console.log(tempArray01[4]*6);					
+				fourQuadrantCanvas("II",width,x,y);
+			}	
+
+//canvas II Quad II							
+			if (tempArray01[0]==10 && tempArray01[2]==6){
+				x=(tempArray01[1]*(width/2))*-1;
+				y=tempArray01[3]*(width/2);
+				if (colorBy=="orthant"){				
+				ctxII.fillStyle = "red";}
+				if (colorBy=="independentVariable"){
+				ctxII.fillStyle = "rgb("+(tempArray01[4]*6.7)+",0,0)";}
+				fourQuadrantCanvas("II",width,x,y);
+			}	
+			
+//canvas II Quad III			
+			if (tempArray01[0]==10 && tempArray01[2]==0){
+				x=(tempArray01[1]*(width/2))*-1;
+				y=(tempArray01[3]*(width/2))*-1;
+				if (colorBy=="orthant"){				
+				ctxII.fillStyle = "orange";}
+				if (colorBy=="independentVariable"){
+				ctxII.fillStyle = "rgb("+(tempArray01[4]*6.7)+",0,0)";}
+				fourQuadrantCanvas("II",width,x,y);
+			}	
+
+//canvas II Quad IV
+			if (tempArray01[0]==4 && tempArray01[2]==0){
+				x=tempArray01[1]*(width/2);
+				y=(tempArray01[3]*(width/2))*-1;
+				if (colorBy=="orthant"){				
+				ctxII.fillStyle = "purple";}
+				if (colorBy=="independentVariable"){
+				ctxII.fillStyle = "rgb("+(tempArray01[4]*6.7)+",0,0)";}
+				fourQuadrantCanvas("II",width,x,y);
+			}			
+
+//canvasIII Quad I			
+			if (tempArray01[0]==4 && tempArray01[2]==4){
+				x=tempArray01[1]*(width/2);
+				y=tempArray01[3]*(width/2);
+				console.log(tempArray01);
+				if (colorBy=="orthant"){
+				ctxIII.fillStyle = "black";}
+				if (colorBy=="independentVariable"){
+				ctxIII.fillStyle = "rgb("+(tempArray01[4]*6.7)+",0,0)";}	
+//console.log(tempArray01[4]*6);					
+				fourQuadrantCanvas("III",width,x,y);
+			}	
+
+//canvas III Quad II							
+			if (tempArray01[0]==10 && tempArray01[2]==4){
+				x=(tempArray01[1]*(width/2))*-1;
+				y=tempArray01[3]*(width/2);
+				if (colorBy=="orthant"){				
+				ctxIII.fillStyle = "red";}
+				if (colorBy=="independentVariable"){
+				ctxIII.fillStyle = "rgb("+(tempArray01[4]*6.7)+",0,0)";}
+				fourQuadrantCanvas("III",width,x,y);
+			}	
+			
+//canvas III Quad III			
+			if (tempArray01[0]==10 && tempArray01[2]==10){
+				x=(tempArray01[1]*(width/2))*-1;
+				y=(tempArray01[3]*(width/2))*-1;
+				if (colorBy=="orthant"){				
+				ctxIII.fillStyle = "orange";}
+				if (colorBy=="independentVariable"){
+				ctxIII.fillStyle = "rgb("+(tempArray01[4]*6.7)+",0,0)";}
+				fourQuadrantCanvas("III",width,x,y);
+			}	
+
+//canvas III Quad IV
+			if (tempArray01[0]==4 && tempArray01[2]==10){
+				x=tempArray01[1]*(width/2);
+				y=(tempArray01[3]*(width/2))*-1;
+				if (colorBy=="orthant"){				
+				ctxIII.fillStyle = "purple";}
+				if (colorBy=="independentVariable"){
+				ctxIII.fillStyle = "rgb("+(tempArray01[4]*6.7)+",0,0)";}
+				fourQuadrantCanvas("III",width,x,y);
+			}	
+
+//canvasIV Quad I			
+			if (tempArray01[0]==0 && tempArray01[2]==4){
+				x=tempArray01[1]*(width/2);
+				y=tempArray01[3]*(width/2);
+				console.log(tempArray01);
+				if (colorBy=="orthant"){
+				ctxIV.fillStyle = "black";}
+				if (colorBy=="independentVariable"){
+				ctxIV.fillStyle = "rgb("+(tempArray01[4]*6.7)+",0,0)";}	
+//console.log(tempArray01[4]*6);					
+				fourQuadrantCanvas("IV",width,x,y);
+			}	
+
+//canvas IV Quad II							
+			if (tempArray01[0]==6 && tempArray01[2]==4){
+				x=(tempArray01[1]*(width/2))*-1;
+				y=tempArray01[3]*(width/2);
+				if (colorBy=="orthant"){				
+				ctxIV.fillStyle = "red";}
+				if (colorBy=="independentVariable"){
+				ctxIV.fillStyle = "rgb("+(tempArray01[4]*6.7)+",0,0)";}
+				fourQuadrantCanvas("IV",width,x,y);
+			}	
+			
+//canvas IV Quad III			
+			if (tempArray01[0]==6 && tempArray01[2]==10){
+				x=(tempArray01[1]*(width/2))*-1;
+				y=(tempArray01[3]*(width/2))*-1;
+				if (colorBy=="orthant"){				
+				ctxIV.fillStyle = "orange";}
+				if (colorBy=="independentVariable"){
+				ctxIV.fillStyle = "rgb("+(tempArray01[4]*6.7)+",0,0)";}
+				fourQuadrantCanvas("IV",width,x,y);
+			}	
+
+//canvas IV Quad IV
+			if (tempArray01[0]==0 && tempArray01[2]==10){
+				x=tempArray01[1]*(width/2);
+				y=(tempArray01[3]*(width/2))*-1;
+				if (colorBy=="orthant"){				
+				ctxIV.fillStyle = "purple";}
+				if (colorBy=="independentVariable"){
+				ctxIV.fillStyle = "rgb("+(tempArray01[4]*6.7)+",0,0)";}
+				fourQuadrantCanvas("IV",width,x,y);
+			}
+			
+//canvasV Quad I			
+			if (tempArray01[0]==0 && tempArray01[2]==2){
+				x=tempArray01[1]*(width/2);
+				y=tempArray01[3]*(width/2);
+				console.log(tempArray01);
+				if (colorBy=="orthant"){
+				ctxV.fillStyle = "black";}
+				if (colorBy=="independentVariable"){
+				ctxV.fillStyle = "rgb("+(tempArray01[4]*6.7)+",0,0)";}	
+//console.log(tempArray01[4]*6);					
+				fourQuadrantCanvas("V",width,x,y);
+			}	
+
+//canvas V Quad II							
+			if (tempArray01[0]==6 && tempArray01[2]==2){
+				x=(tempArray01[1]*(width/2))*-1;
+				y=tempArray01[3]*(width/2);
+				if (colorBy=="orthant"){				
+				ctxV.fillStyle = "red";}
+				if (colorBy=="independentVariable"){
+				ctxV.fillStyle = "rgb("+(tempArray01[4]*6.7)+",0,0)";}
+				fourQuadrantCanvas("V",width,x,y);
+			}	
+			
+//canvas V Quad III			
+			if (tempArray01[0]==6 && tempArray01[2]==8){
+				x=(tempArray01[1]*(width/2))*-1;
+				y=(tempArray01[3]*(width/2))*-1;
+				if (colorBy=="orthant"){				
+				ctxV.fillStyle = "orange";}
+				if (colorBy=="independentVariable"){
+				ctxV.fillStyle = "rgb("+(tempArray01[4]*6.7)+",0,0)";}
+				fourQuadrantCanvas("V",width,x,y);
+			}	
+
+//canvas V Quad IV
+			if (tempArray01[0]==0 && tempArray01[2]==8){
+				x=tempArray01[1]*(width/2);
+				y=(tempArray01[3]*(width/2))*-1;
+				if (colorBy=="orthant"){				
+				ctxV.fillStyle = "purple";}
+				if (colorBy=="independentVariable"){
+				ctxV.fillStyle = "rgb("+(tempArray01[4]*6.7)+",0,0)";}
+				fourQuadrantCanvas("V",width,x,y);
+			}			
+
+//canvasVI Quad I			
+			if (tempArray01[0]==0 && tempArray01[2]==0){
+				x=tempArray01[1]*(width/2);
+				y=tempArray01[3]*(width/2);
+				console.log(tempArray01);
+				if (colorBy=="orthant"){
+				ctxVI.fillStyle = "black";}
+				if (colorBy=="independentVariable"){
+				ctxVI.fillStyle = "rgb("+(tempArray01[4]*6.7)+",0,0)";}	
+//console.log(tempArray01[4]*6);					
+				fourQuadrantCanvas("VI",width,x,y);
+			}	
+
+//canvas VI Quad II							
+			if (tempArray01[0]==6 && tempArray01[2]==0){
+				x=(tempArray01[1]*(width/2))*-1;
+				y=tempArray01[3]*(width/2);
+				if (colorBy=="orthant"){				
+				ctxVI.fillStyle = "red";}
+				if (colorBy=="independentVariable"){
+				ctxVI.fillStyle = "rgb("+(tempArray01[4]*6.7)+",0,0)";}
+				fourQuadrantCanvas("VI",width,x,y);
+			}	
+			
+//canvas VI Quad III			
+			if (tempArray01[0]==6 && tempArray01[2]==6){
+				x=(tempArray01[1]*(width/2))*-1;
+				y=(tempArray01[3]*(width/2))*-1;
+				if (colorBy=="orthant"){				
+				ctxVI.fillStyle = "orange";}
+				if (colorBy=="independentVariable"){
+				ctxVI.fillStyle = "rgb("+(tempArray01[4]*6.7)+",0,0)";}
+				fourQuadrantCanvas("VI",width,x,y);
+			}	
+
+//canvas VI Quad IV
+			if (tempArray01[0]==0 && tempArray01[2]==6){
+				x=tempArray01[1]*(width/2);
+				y=(tempArray01[3]*(width/2))*-1;
+				if (colorBy=="orthant"){				
+				ctxVI.fillStyle = "purple";}
+				if (colorBy=="independentVariable"){
+				ctxVI.fillStyle = "rgb("+(tempArray01[4]*6.7)+",0,0)";}
+				fourQuadrantCanvas("VI",width,x,y);
+			}		
+
+//canvasVII Quad I			
+			if (tempArray01[0]==8 && tempArray01[2]==0){
+				x=tempArray01[1]*(width/2);
+				y=tempArray01[3]*(width/2);
+				console.log(tempArray01);
+				if (colorBy=="orthant"){
+				ctxVII.fillStyle = "black";}
+				if (colorBy=="independentVariable"){
+				ctxVII.fillStyle = "rgb("+(tempArray01[4]*6.7)+",0,0)";}	
+//console.log(tempArray01[4]*6);					
+				fourQuadrantCanvas("VII",width,x,y);
+			}	
+
+//canvas VII Quad II							
+			if (tempArray01[0]==2 && tempArray01[2]==0){
+				x=(tempArray01[1]*(width/2))*-1;
+				y=tempArray01[3]*(width/2);
+				if (colorBy=="orthant"){				
+				ctxVII.fillStyle = "red";}
+				if (colorBy=="independentVariable"){
+				ctxVII.fillStyle = "rgb("+(tempArray01[4]*6.7)+",0,0)";}
+				fourQuadrantCanvas("VII",width,x,y);
+			}	
+			
+//canvas VII Quad III			
+			if (tempArray01[0]==2 && tempArray01[2]==6){
+				x=(tempArray01[1]*(width/2))*-1;
+				y=(tempArray01[3]*(width/2))*-1;
+				if (colorBy=="orthant"){				
+				ctxVII.fillStyle = "orange";}
+				if (colorBy=="independentVariable"){
+				ctxVII.fillStyle = "rgb("+(tempArray01[4]*6.7)+",0,0)";}
+				fourQuadrantCanvas("VII",width,x,y);
+			}	
+
+//canvas VII Quad IV
+			if (tempArray01[0]==8 && tempArray01[2]==6){
+				x=tempArray01[1]*(width/2);
+				y=(tempArray01[3]*(width/2))*-1;
+				if (colorBy=="orthant"){				
+				ctxVII.fillStyle = "purple";}
+				if (colorBy=="independentVariable"){
+				ctxVII.fillStyle = "rgb("+(tempArray01[4]*6.7)+",0,0)";}
+				fourQuadrantCanvas("VII",width,x,y);
+			}		
+
+//canvasVIII Quad I			
+			if (tempArray01[0]==8 && tempArray01[2]==10){
+				x=tempArray01[1]*(width/2);
+				y=tempArray01[3]*(width/2);
+				console.log(tempArray01);
+				if (colorBy=="orthant"){
+				ctxVIII.fillStyle = "black";}
+				if (colorBy=="independentVariable"){
+				ctxVIII.fillStyle = "rgb("+(tempArray01[4]*6.7)+",0,0)";}	
+//console.log(tempArray01[4]*6);					
+				fourQuadrantCanvas("VIII",width,x,y);
+			}	
+
+//canvas VIII Quad II							
+			if (tempArray01[0]==2 && tempArray01[2]==10){
+				x=(tempArray01[1]*(width/2))*-1;
+				y=tempArray01[3]*(width/2);
+				if (colorBy=="orthant"){				
+				ctxVIII.fillStyle = "red";}
+				if (colorBy=="independentVariable"){
+				ctxVIII.fillStyle = "rgb("+(tempArray01[4]*6.7)+",0,0)";}
+				fourQuadrantCanvas("VIII",width,x,y);
+			}	
+			
+//canvas VIII Quad III			
+			if (tempArray01[0]==2 && tempArray01[2]==4){
+				x=(tempArray01[1]*(width/2))*-1;
+				y=(tempArray01[3]*(width/2))*-1;
+				if (colorBy=="orthant"){				
+				ctxVIII.fillStyle = "orange";}
+				if (colorBy=="independentVariable"){
+				ctxVIII.fillStyle = "rgb("+(tempArray01[4]*6.7)+",0,0)";}
+				fourQuadrantCanvas("VIII",width,x,y);
+			}	
+
+//canvas VIII Quad IV
+			if (tempArray01[0]==8 && tempArray01[2]==4){
+				x=tempArray01[1]*(width/2);
+				y=(tempArray01[3]*(width/2))*-1;
+				if (colorBy=="orthant"){				
+				ctxVIII.fillStyle = "purple";}
+				if (colorBy=="independentVariable"){
+				ctxVIII.fillStyle = "rgb("+(tempArray01[4]*6.7)+",0,0)";}
+				fourQuadrantCanvas("VIII",width,x,y);
+			}	
+
+//canvasIX Quad I			
+			if (tempArray01[0]==8 && tempArray01[2]==8){
+				x=tempArray01[1]*(width/2);
+				y=tempArray01[3]*(width/2);
+				console.log(tempArray01);
+				if (colorBy=="orthant"){
+				ctxIX.fillStyle = "black";}
+				if (colorBy=="independentVariable"){
+				ctxIX.fillStyle = "rgb("+(tempArray01[4]*6.7)+",0,0)";}	
+//console.log(tempArray01[4]*6);					
+				fourQuadrantCanvas("IX",width,x,y);
+			}	
+
+//canvas IX Quad II							
+			if (tempArray01[0]==2 && tempArray01[2]==8){
+				x=(tempArray01[1]*(width/2))*-1;
+				y=tempArray01[3]*(width/2);
+				if (colorBy=="orthant"){				
+				ctxIX.fillStyle = "red";}
+				if (colorBy=="independentVariable"){
+				ctxIX.fillStyle = "rgb("+(tempArray01[4]*6.7)+",0,0)";}
+				fourQuadrantCanvas("IX",width,x,y);
+			}	
+			
+//canvas IX Quad III			
+			if (tempArray01[0]==2 && tempArray01[2]==2){
+				x=(tempArray01[1]*(width/2))*-1;
+				y=(tempArray01[3]*(width/2))*-1;
+				if (colorBy=="orthant"){				
+				ctxIX.fillStyle = "orange";}
+				if (colorBy=="independentVariable"){
+				ctxIX.fillStyle = "rgb("+(tempArray01[4]*6.7)+",0,0)";}
+				fourQuadrantCanvas("IX",width,x,y);
+			}	
+
+//canvas IX Quad IV
+			if (tempArray01[0]==8 && tempArray01[2]==2){
+				x=tempArray01[1]*(width/2);
+				y=(tempArray01[3]*(width/2))*-1;
+				if (colorBy=="orthant"){				
+				ctxIX.fillStyle = "purple";}
+				if (colorBy=="independentVariable"){
+				ctxIX.fillStyle = "rgb("+(tempArray01[4]*6.7)+",0,0)";}
+				fourQuadrantCanvas("IX",width,x,y);
+			}	
+
+
+
+
+
+
+
+
+
+//close FOR loop			
+		}
+		
+//close function 	
+	}
+
+
+
+
+
+
+function mergeCanvasesSideBySide(canvasI, canvasII, canvasIII, canvasIV, canvasV, canvasVI, canvasVII, canvasVIII, canvasIX) {
+    const finalCanvas = document.getElementById('canvasMerged');
+    const ctx = finalCanvas.getContext('2d');
+    
+    // Calculate total combined dimensions
+    finalCanvas.width = 1500;
+    finalCanvas.height = 1500;
+    
+    // row one
+    ctx.drawImage(document.getElementById(canvasI), 0, 0);
+    ctx.drawImage(document.getElementById(canvasII), 500, 0);
+    ctx.drawImage(document.getElementById(canvasIII), 1000, 0);
+    // row two
+    ctx.drawImage(document.getElementById(canvasIV), 0, 500);
+    ctx.drawImage(document.getElementById(canvasV), 500, 500);
+    ctx.drawImage(document.getElementById(canvasVI), 1000, 500);
+    // row three
+    ctx.drawImage(document.getElementById(canvasVII), 0, 1000);
+    ctx.drawImage(document.getElementById(canvasVIII), 500, 1000);
+    ctx.drawImage(document.getElementById(canvasIX), 1000, 1000);
+
+
+
+    return finalCanvas;
+}
+
+
+curveToQuadCanvas(500,curveArray);
+mergeCanvasesSideBySide("canvasI","canvasII","canvasIII","canvasIV","canvasV","canvasVI","canvasVII","canvasVIII","canvasIX");
+
+function downloadCanvasAsJpeg(canvasId, fileName = 'cHex EXP s times '+theta+' .png', quality = 1) {
+  // 1. Locate the canvas element
+  const canvas = document.getElementById(canvasId);
+  
+  // 2. Convert canvas to a JPEG data URL (Quality ranges from 0.0 to 1.0)
+  const dataUrl = canvas.toDataURL('image/png', quality);
+  
+  // 3. Create a temporary anchor element
+  const link = document.createElement('a');
+  
+  // 4. Set the download attributes
+  link.download = fileName;
+  link.href = dataUrl;
+  
+  // 5. Trigger a virtual click to start the download
+  link.click();
+}
+
+
+downloadCanvasAsJpeg("canvasMerged");
+
+</script>
+
+
+      <br><br><br>
+        
+    <br><br><br>
+&copy; 2025-Present, Ben Blohowiak<br><br>
+
+Questions? Feedback? <br><em>ben</em> at <em>benblohowiak dot com</em>
+</body>
