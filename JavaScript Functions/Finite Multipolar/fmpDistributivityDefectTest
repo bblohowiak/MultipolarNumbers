@@ -1,0 +1,26 @@
+	function fmpDistributivityDefectTest(a,b,c,d,e,f,g,h,w,x,y,z,p){
+//p indicates quantity of signs in system
+//in x(y+z), (a,b,c,d)=x; (e,f,g,h)=y; (w,x,y,z)=z	
+
+		let outputArray=[];
+		let consolidateFirst=[];
+		let multiplyFirst=[];
+		let defectStatus="";
+
+	consolidateFirst=fmpComplexMultiply(a,b,c,d,...consolidate(e,f,g,h,w,x,y,z),6);
+	multiplyFirst=consolidate(...fmpComplexMultiply(a,b,c,d,e,f,g,h,p),...fmpComplexMultiply(a,b,c,d,w,x,y,z,p));
+
+
+console.log(consolidateFirst);
+		if (arraysEqual(consolidateFirst, multiplyFirst)==true) {
+		defectStatus="No distributive defect detected";
+		} else {
+		defectStatus="Yes distributive defect detected";
+		}
+
+		outputArray.push(defectStatus,consolidateFirst,multiplyFirst);		
+		
+	
+	return outputArray;
+//close function		
+	}
